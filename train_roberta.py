@@ -132,8 +132,8 @@ decision_metric='eval_'+d_metric
 outcome_variable='helpfulness'
 ## final results files
 ##https://drive.google.com/drive/folders/17pwdiiu7U1oyly8YwMtqCRdu3GBIWT3K
-file_path='/final_results_paws.csv'
-logs_path='/'
+file_path='final_results_paws.csv'
+logs_path=''
 run_name=dataset+"_hyp_final_"+outcome_variable
 
 df=process_data(file_path=file_path,dataset=dataset,amr=amr_flag,outcome_variable=outcome_variable)
