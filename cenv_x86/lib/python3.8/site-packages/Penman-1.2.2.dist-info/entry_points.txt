@@ -1,0 +1,3 @@
+[console_scripts]
+penman = penman.__main__:main
+
