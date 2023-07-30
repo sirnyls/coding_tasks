@@ -95,10 +95,9 @@ class CustomTrainer(Trainer):
         return (loss, outputs) if return_outputs else loss
 '''
 class CustomTrainer(Trainer):
-    def __init__(self, model_init, args, train_dataset, eval_dataset, compute_metrics, class_weights):
+    def __init__(self, model_init, args, train_dataset, eval_dataset, compute_metrics):
         super().__init__(model_init=model_init, args=args, train_dataset=train_dataset, eval_dataset=eval_dataset, compute_metrics=compute_metrics)
-        self.class_weights = class_weights
-
+        
     def compute_loss(self, model, inputs, return_outputs=False):
         labels = inputs.get("labels")
         # forward pass
