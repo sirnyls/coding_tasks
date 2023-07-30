@@ -132,7 +132,7 @@ parameters_dict = {
 """
 parameters_dict = {
     "learning_rate": {"values": [1e-5]},
-    "per_device_train_batch_size": {"values": [32 ]},
+    "per_device_train_batch_size": {"values": [64 ]},
     }
 sweep_config['parameters'] = parameters_dict
 
