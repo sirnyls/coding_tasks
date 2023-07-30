@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import class_weight
 from torch import nn
 import transformers
+import torch.nn.functional as F
 import wandb
 
 def compute_metrics_discrete(eval_pred):
@@ -59,10 +60,10 @@ def split_sets(dataset,df):
     if dataset in ['translation']:
         df['set']=df.id.str[:10]
         train_set=df.loc[df['set']=='newstest13']
-        dev_set, test_set = train_test_split(df.loc[df['set']=='newstest16'], test_size=0.5,random_state=42)
+        dev_set, test_set = train_test_split(df.loc[df['set']=='newstest16'], test_size=0.6,random_state=42)
     elif dataset in ['PAWS','pubmed']:
-        train_set, val_df = train_test_split(df, test_size=0.3,random_state=42)
-        dev_set, test_set = train_test_split(val_df, test_size=0.5,random_state=42)
+        train_set, val_df = train_test_split(df, test_size=0.2,random_state=42)
+        dev_set, test_set = train_test_split(val_df, test_size=0.6,random_state=42)
     elif dataset in ['logic','django','spider']:
         train_set=df.loc[df['id'].str.contains('train')]
         test_set=df.loc[df['id'].str.contains('test')]
@@ -81,7 +82,7 @@ def model_init():
     for name, param in m.classifier.named_parameters():
         param.requires_grad = True
     return m
-
+'''
 class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False):
         labels = inputs.get("labels")
@@ -92,6 +93,25 @@ class CustomTrainer(Trainer):
         loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(class_weights, device=model.device,dtype=torch.float))
         loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
         return (loss, outputs) if return_outputs else loss
+'''
+class CustomTrainer(Trainer):
+    def __init__(self, model_init, args, train_dataset, eval_dataset, compute_metrics, class_weights):
+        super().__init__(model_init=model_init, args=args, train_dataset=train_dataset, eval_dataset=eval_dataset, compute_metrics=compute_metrics)
+        self.class_weights = class_weights
+
+    def compute_loss(self, model, inputs, return_outputs=False):
+        labels = inputs.get("labels")
+        # forward pass
+        outputs = model(**inputs)
+        logits = outputs.get("logits")
+        
+        # Compute Focal Loss
+        alpha = torch.tensor(self.class_weights, device=model.device, dtype=torch.float)
+        focal_loss = -alpha * (1 - F.softmax(logits, dim=-1)) ** self.args.focal_loss_gamma * F.log_softmax(logits, dim=-1)
+        loss = focal_loss.sum(dim=-1).mean()
+        
+        return (loss, outputs) if return_outputs else loss
+
 
 def freeze_weights(m):
     for name, param in m.named_parameters():
@@ -112,7 +132,7 @@ parameters_dict = {
     }
 """
 parameters_dict = {
-    "learning_rate": {"values": [2e-5]},
+    "learning_rate": {"values": [1e-5]},
     "per_device_train_batch_size": {"values": [32 ]},
     }
 sweep_config['parameters'] = parameters_dict
@@ -173,12 +193,12 @@ training_args = TrainingArguments(
     report_to=None,
     evaluation_strategy='epoch',
     save_strategy='epoch',
-    learning_rate=2e-6,
-    per_device_train_batch_size=32,
-    per_device_eval_batch_size=32,
+    learning_rate=1e-5,
+    per_device_train_batch_size=64,
+    per_device_eval_batch_size=64,
     save_total_limit=1,
-    num_train_epochs=15,
-    weight_decay=0.001,
+    num_train_epochs=25,
+    weight_decay=0.0001,
     warmup_steps=1000,
     push_to_hub=False,
     logging_dir=logs_path+'logs/'+run_name,
@@ -187,6 +207,8 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,
     metric_for_best_model=decision_metric,
     greater_is_better=True,
+    focal_loss_gamma=2.0,
+
 )
 
 trainer = CustomTrainer(
