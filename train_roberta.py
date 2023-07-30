@@ -105,7 +105,7 @@ class CustomTrainer(Trainer):
         logits = outputs.get("logits")
         
         # Compute Focal Loss
-        alpha = torch.tensor(self.class_weights, device=model.device, dtype=torch.float)
+        alpha = torch.tensor(weight=torch.tensor(class_weights), device=model.device, dtype=torch.float)
         focal_loss = -alpha * (1 - F.softmax(logits, dim=-1)) **   2.0 * F.log_softmax(logits, dim=-1)
         loss = focal_loss.sum(dim=-1).mean()
         
