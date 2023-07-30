@@ -82,7 +82,7 @@ def model_init():
     for name, param in m.classifier.named_parameters():
         param.requires_grad = True
     return m
-'''
+
 class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False):
         labels = inputs.get("labels")
@@ -110,7 +110,7 @@ class CustomTrainer(Trainer):
         loss = focal_loss.sum(dim=-1).mean()
         
         return (loss, outputs) if return_outputs else loss
-
+'''
 
 def freeze_weights(m):
     for name, param in m.named_parameters():
