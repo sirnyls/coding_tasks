@@ -1,5 +1,5 @@
 import pandas as pd
-from transformers import RobertaTokenizer, RobertaForSequenceClassification, AdamW
+from transformers import RobertaTokenizer, RobertaForSequenceClassification, AdamW, get_linear_schedule_with_warmup
 import torch
 from transformers import Trainer, TrainingArguments
 import numpy as np
@@ -14,6 +14,7 @@ from torch import nn
 import transformers
 import torch.nn.functional as F
 import wandb
+import optuna
 
 def compute_metrics_discrete(eval_pred):
     logits, labels = eval_pred
@@ -93,29 +94,15 @@ class CustomTrainer(Trainer):
         loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(class_weights, device=model.device,dtype=torch.float))
         loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
         return (loss, outputs) if return_outputs else loss
-'''
-class CustomTrainer(Trainer):
-    def __init__(self, model_init, args, train_dataset, eval_dataset, compute_metrics):
-        super().__init__(model_init=model_init, args=args, train_dataset=train_dataset, eval_dataset=eval_dataset, compute_metrics=compute_metrics)
-        
-    def compute_loss(self, model, inputs, return_outputs=False):
-        labels = inputs.get("labels")
-        # forward pass
-        outputs = model(**inputs)
-        logits = outputs.get("logits")
-        
-        # Compute Focal Loss
-        alpha = torch.tensor(torch.tensor(class_weights, device=model.device,dtype=torch.float), device=model.device, dtype=torch.float)
-        focal_loss = -alpha * (1 - F.softmax(logits, dim=-1)) **   2.0 * F.log_softmax(logits, dim=-1)
-        loss = focal_loss.sum(dim=-1).mean()
-        
-        return (loss, outputs) if return_outputs else loss
-'''
+
 
 def freeze_weights(m):
     for name, param in m.named_parameters():
         param.requires_grad = False  
 
+def schedule_lr(num_warmup_steps, num_training_steps, optimizer):
+    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=num_training_steps)
+    return scheduler
 
 sweep_config = {
     'method': 'random'
@@ -187,27 +174,104 @@ train_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label
 val_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 test_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 
+## optuna for automated hyperparameter tuning
+# Define the objective function for Optuna
+def objective(trial):
+    training_args = TrainingArguments(
+        output_dir=logs_path + 'results/' + run_name,
+        report_to=None,
+        evaluation_strategy='epoch',
+        save_strategy='epoch',
+        learning_rate=trial.suggest_float("learning_rate", 1e-6, 1e-4, log=True),
+        per_device_train_batch_size=trial.suggest_categorical("per_device_train_batch_size", [16, 32, 64]),
+        per_device_eval_batch_size=trial.suggest_categorical("per_device_eval_batch_size", [32, 64]),
+        save_total_limit=1,
+        num_train_epochs=25,
+        weight_decay=trial.suggest_float("weight_decay", 0.0, 0.1),
+        warmup_steps=1000,
+        push_to_hub=False,
+        logging_dir=logs_path + 'logs/' + run_name,
+        logging_steps=15,
+        seed=42,
+        load_best_model_at_end=True,
+        metric_for_best_model=decision_metric,
+        greater_is_better=True,
+        dataloader_num_workers=4,
+    )
+
+    trainer = CustomTrainer(
+        model_init=model_init,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=val_dataset,
+        compute_metrics=compute_metrics_discrete,
+    )
+
+    # Training the model
+    trainer.train()
+
+    # Evaluate on the validation set
+    res_val = trainer.evaluate()
+
+    # Optuna maximizes the objective function, so we minimize the negative f1-score for the positive class
+    return -res_val['eval_f1_1']
+
+# Create the Optuna study
+study = optuna.create_study(direction="minimize")
+
+# Start the optimization process
+study.optimize(objective, n_trials=50)
+
+best_params = study.best_params
+print("Best Hyperparameters:")
+print(best_params)
+
+training_args = TrainingArguments(
+    output_dir=logs_path + 'results/' + run_name,
+    report_to=None,
+    evaluation_strategy='epoch',
+    save_strategy='epoch',
+    learning_rate=best_params["learning_rate"],
+    per_device_train_batch_size=best_params["per_device_train_batch_size"],
+    per_device_eval_batch_size=best_params["per_device_eval_batch_size"],
+    save_total_limit=1,
+    num_train_epochs=25,
+    weight_decay=best_params["weight_decay"],
+    warmup_steps=1000,
+    push_to_hub=False,
+    logging_dir=logs_path + 'logs/' + run_name,
+    logging_steps=15,
+    seed=42,
+    load_best_model_at_end=True,
+    metric_for_best_model=decision_metric,
+    greater_is_better=True,
+    dataloader_num_workers=4,
+)
+
+'''
 training_args = TrainingArguments(
     output_dir=logs_path+'results/'+run_name,
     report_to=None,
     evaluation_strategy='epoch',
     save_strategy='epoch',
     learning_rate=1e-5,
-    per_device_train_batch_size=64,
+    per_device_train_batch_size=32,
     per_device_eval_batch_size=64,
     save_total_limit=1,
     num_train_epochs=25,
-    weight_decay=0.0001,
-    warmup_steps=1000,
+    weight_decay=0.01,
+    warmup_steps=500,
     push_to_hub=False,
     logging_dir=logs_path+'logs/'+run_name,
     logging_steps=15,
     seed=42,
     load_best_model_at_end=True,
     metric_for_best_model=decision_metric,
-    greater_is_better=True
+    greater_is_better=True,
+    dataloader_num_workers=4,
 
 )
+'''
 
 trainer = CustomTrainer(
     model_init=model_init,
@@ -216,6 +280,18 @@ trainer = CustomTrainer(
     eval_dataset=val_dataset,
     compute_metrics=compute_metrics_discrete,
 )
+
+# Learning rate scheduler
+num_warmup_steps = int(len(train_dataset) / training_args.per_device_train_batch_size * training_args.warmup_ratio)
+num_training_steps = len(train_dataset) * training_args.num_train_epochs // training_args.per_device_train_batch_size
+
+scheduler = schedule_lr(num_warmup_steps, num_training_steps, trainer.optimizer)
+trainer.lr_scheduler = scheduler
+
+# Early stopping 
+early_stopping_callback = EarlyStoppingCallback(early_stopping_patience=3, early_stopping_threshold=0.01)
+trainer.add_callback(early_stopping_callback)
+
 trainer.train()
 
 print("##### VALIDATION RESULTS#####")
