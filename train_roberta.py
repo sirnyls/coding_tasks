@@ -16,6 +16,7 @@ import torch.nn.functional as F
 import wandb
 import optuna
 
+
 def compute_metrics_discrete(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
@@ -138,7 +139,7 @@ decision_metric='eval_'+d_metric
 outcome_variable='helpfulness'
 ## final results files
 ##https://drive.google.com/drive/folders/17pwdiiu7U1oyly8YwMtqCRdu3GBIWT3K
-file_path='final_results_pawscsv'
+file_path='final_results_paws.csv'
 logs_path=''
 run_name=dataset+"_hyp_final_"+outcome_variable
 
