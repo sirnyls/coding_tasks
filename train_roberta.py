@@ -5,7 +5,7 @@ from transformers import Trainer, TrainingArguments
 import numpy as np
 from datasets import Dataset, DatasetDict
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
-from transformers import set_seed
+from transformers import set_seed, EarlyStoppingCallback
 from sklearn.metrics import mean_squared_error,mean_absolute_error,r2_score,classification_report
 from datasets import load_metric
 from sklearn.model_selection import train_test_split
