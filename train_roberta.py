@@ -76,7 +76,7 @@ def tokenize(batch):
 
 def model_init():
     transformers.set_seed(42)
-    m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2,device_map='auto')
+    m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2, device_map='auto')
     m.roberta.apply(freeze_weights)
     for name, param in m.classifier.named_parameters():
         param.requires_grad = True
@@ -87,11 +87,14 @@ class CustomTrainer(Trainer):
         labels = inputs.get("labels")
         # forward pass
         outputs = model(**inputs)
-        logits = outputs.get("logits")
+        #logits = outputs.get("logits")
+        logits = outputs.logits
         # compute custom loss (suppose one has 2 labels with different weights)
         loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(class_weights, device=model.device,dtype=torch.float))
+        
         loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
         return (loss, outputs) if return_outputs else loss
+    
 
 def freeze_weights(m):
     for name, param in m.named_parameters():
@@ -121,10 +124,10 @@ sweep_config['metric'] = metric
 #sweep_id = wandb.sweep(sweep_config, project="helpfulness")
 
 
-dataset='translation'
+dataset='PAWS'
 #datasets=['PAWS','translation','pubmed','logic','django','spider']
 ## True for balancing the observations in the loss function (currently not working)
-compute_weights=False
+compute_weights=True
 current=-1
 d_metric='f1_1'
 amr_flag=True
@@ -132,7 +135,7 @@ decision_metric='eval_'+d_metric
 outcome_variable='helpfulness'
 ## final results files
 ##https://drive.google.com/drive/folders/17pwdiiu7U1oyly8YwMtqCRdu3GBIWT3K
-file_path='final_results_trans_corrected.csv'
+file_path='final_results_paws.csv'
 logs_path=''
 run_name=dataset+"_hyp_final_"+outcome_variable
 
@@ -140,7 +143,10 @@ df=process_data(file_path=file_path,dataset=dataset,amr=amr_flag,outcome_variabl
 train_set,dev_set,test_set=split_sets(dataset=dataset,df=df)
 
 if compute_weights:
-    class_weights=class_weight.compute_class_weight(class_weight='balanced',classes=train_set.label.unique(),y=train_set.label.values)
+    #class_weights=class_weight.compute_class_weight(class_weight='balanced',classes=train_set.label.unique(),y=train_set.label.values)
+    # use new class_weights approach
+    class_weights = class_weight.compute_class_weight('balanced', classes=np.unique(train_set.label), y=train_set.label)
+
 else:
     ## same weights but balance dataset
     class_weights=np.ones(df.label.unique().shape[0])
@@ -211,4 +217,4 @@ print("Dataset: ",dataset)
 print("Decision metric ",'test_',d_metric,": ",res.metrics['test_'+d_metric])
 
 
-trainer.save_model(logs_path+"models/"+run_name)
+trainer.save_model(logs_path+"models/"+run_name)2
