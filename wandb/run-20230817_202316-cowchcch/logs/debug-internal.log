@@ -1,0 +1,282 @@
+2023-08-17 20:23:16,394 INFO    StreamThr :46898 [internal.py:wandb_internal():86] W&B internal server running at pid: 46898, started at: 2023-08-17 20:23:16.394152
+2023-08-17 20:23:16,395 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status
+2023-08-17 20:23:16,398 INFO    WriterThread:46898 [datastore.py:open_for_write():85] open: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/run-cowchcch.wandb
+2023-08-17 20:23:16,398 DEBUG   SenderThread:46898 [sender.py:send():379] send: header
+2023-08-17 20:23:16,418 DEBUG   SenderThread:46898 [sender.py:send():379] send: run
+2023-08-17 20:23:16,906 INFO    SenderThread:46898 [dir_watcher.py:__init__():211] watching files in: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files
+2023-08-17 20:23:16,906 INFO    SenderThread:46898 [sender.py:_start_run_threads():1121] run started: cowchcch with start time 1692296596.393984
+2023-08-17 20:23:16,908 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: summary_record
+2023-08-17 20:23:16,908 INFO    SenderThread:46898 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-17 20:23:16,915 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: check_version
+2023-08-17 20:23:16,915 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: check_version
+2023-08-17 20:23:17,044 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: run_start
+2023-08-17 20:23:17,052 DEBUG   HandlerThread:46898 [system_info.py:__init__():31] System info init
+2023-08-17 20:23:17,052 DEBUG   HandlerThread:46898 [system_info.py:__init__():46] System info init done
+2023-08-17 20:23:17,052 INFO    HandlerThread:46898 [system_monitor.py:start():181] Starting system monitor
+2023-08-17 20:23:17,052 INFO    SystemMonitor:46898 [system_monitor.py:_start():145] Starting system asset monitoring threads
+2023-08-17 20:23:17,053 INFO    HandlerThread:46898 [system_monitor.py:probe():201] Collecting system info
+2023-08-17 20:23:17,053 INFO    SystemMonitor:46898 [interfaces.py:start():190] Started cpu monitoring
+2023-08-17 20:23:17,053 DEBUG   HandlerThread:46898 [system_info.py:probe():195] Probing system
+2023-08-17 20:23:17,053 INFO    SystemMonitor:46898 [interfaces.py:start():190] Started disk monitoring
+2023-08-17 20:23:17,053 INFO    SystemMonitor:46898 [interfaces.py:start():190] Started gpuapple monitoring
+2023-08-17 20:23:17,055 INFO    SystemMonitor:46898 [interfaces.py:start():190] Started memory monitoring
+2023-08-17 20:23:17,056 INFO    SystemMonitor:46898 [interfaces.py:start():190] Started network monitoring
+2023-08-17 20:23:17,059 DEBUG   HandlerThread:46898 [system_info.py:_probe_git():180] Probing git
+2023-08-17 20:23:17,081 DEBUG   HandlerThread:46898 [system_info.py:_probe_git():188] Probing git done
+2023-08-17 20:23:17,082 DEBUG   HandlerThread:46898 [system_info.py:probe():240] Probing system done
+2023-08-17 20:23:17,082 DEBUG   HandlerThread:46898 [system_monitor.py:probe():210] {'os': 'macOS-13.4-arm64-arm-64bit', 'python': '3.10.12', 'heartbeatAt': '2023-08-17T18:23:17.053548', 'startedAt': '2023-08-17T18:23:16.385316', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '/Users/nils/task2/train_roberta.py', 'codePath': 'train_roberta.py', 'git': {'remote': 'https://github.com/sirnyls/task2.git', 'commit': '7a187fa2476a817b7126d12e1edf3384d7da2cda'}, 'email': None, 'root': '/Users/nils/task2', 'host': 'MBP-von-Nils', 'username': 'nils', 'executable': '/Users/nils/miniconda3/envs/test/bin/python', 'cpu_count': 10, 'cpu_count_logical': 10, 'disk': {'total': 460.4317207336426, 'used': 8.443134307861328}, 'gpuapple': {'type': 'arm', 'vendor': 'Apple'}, 'memory': {'total': 16.0}}
+2023-08-17 20:23:17,082 INFO    HandlerThread:46898 [system_monitor.py:probe():211] Finished collecting system info
+2023-08-17 20:23:17,082 INFO    HandlerThread:46898 [system_monitor.py:probe():214] Publishing system info
+2023-08-17 20:23:17,082 DEBUG   HandlerThread:46898 [system_info.py:_save_pip():51] Saving list of pip packages installed into the current environment
+2023-08-17 20:23:17,082 DEBUG   HandlerThread:46898 [system_info.py:_save_pip():67] Saving pip packages done
+2023-08-17 20:23:17,082 DEBUG   HandlerThread:46898 [system_info.py:_save_conda():74] Saving list of conda packages installed into the current environment
+2023-08-17 20:23:17,910 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/conda-environment.yaml
+2023-08-17 20:23:17,910 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/wandb-summary.json
+2023-08-17 20:23:17,910 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/requirements.txt
+2023-08-17 20:23:19,721 DEBUG   HandlerThread:46898 [system_info.py:_save_conda():86] Saving conda packages done
+2023-08-17 20:23:19,721 INFO    HandlerThread:46898 [system_monitor.py:probe():216] Finished publishing system info
+2023-08-17 20:23:19,724 DEBUG   SenderThread:46898 [sender.py:send():379] send: files
+2023-08-17 20:23:19,724 INFO    SenderThread:46898 [sender.py:_save_file():1375] saving file wandb-metadata.json with policy now
+2023-08-17 20:23:19,729 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-17 20:23:19,730 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: stop_status
+2023-08-17 20:23:19,920 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/conda-environment.yaml
+2023-08-17 20:23:19,920 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/wandb-metadata.json
+2023-08-17 20:23:20,020 DEBUG   SenderThread:46898 [sender.py:send():379] send: telemetry
+2023-08-17 20:23:20,020 DEBUG   SenderThread:46898 [sender.py:send():379] send: config
+2023-08-17 20:23:20,020 DEBUG   SenderThread:46898 [sender.py:send():379] send: metric
+2023-08-17 20:23:20,020 DEBUG   SenderThread:46898 [sender.py:send():379] send: telemetry
+2023-08-17 20:23:20,020 DEBUG   SenderThread:46898 [sender.py:send():379] send: metric
+2023-08-17 20:23:20,020 WARNING SenderThread:46898 [sender.py:send_metric():1326] Seen metric with glob (shouldn't happen)
+2023-08-17 20:23:20,435 INFO    wandb-upload_0:46898 [upload_job.py:push():131] Uploaded file /var/folders/tq/vxytrqv13kx3fp71v2wgtd000000gn/T/tmpjayhmq8vwandb/vfk2br7n-wandb-metadata.json
+2023-08-17 20:23:20,925 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_created():271] file/dir created: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:23:22,031 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:23:22,937 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:23:27,056 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:23:30,971 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:23:32,251 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:23:34,734 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-17 20:23:34,736 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: stop_status
+2023-08-17 20:23:34,991 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:23:38,219 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:23:39,011 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:23:43,030 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:23:43,645 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:23:49,058 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:23:49,097 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:23:49,739 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-17 20:23:50,757 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: stop_status
+2023-08-17 20:23:51,066 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/config.yaml
+2023-08-17 20:23:53,075 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:23:56,346 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:23:57,094 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:01,923 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:24:03,119 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:04,744 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-17 20:24:04,745 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: stop_status
+2023-08-17 20:24:06,970 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:24:07,140 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:11,158 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:12,023 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:24:14,174 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:17,061 DEBUG   SystemMonitor:46898 [system_monitor.py:_start():159] Starting system metrics aggregation loop
+2023-08-17 20:24:17,063 DEBUG   SenderThread:46898 [sender.py:send():379] send: telemetry
+2023-08-17 20:24:17,063 DEBUG   SenderThread:46898 [sender.py:send():379] send: stats
+2023-08-17 20:24:17,063 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:24:19,749 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-17 20:24:19,750 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: stop_status
+2023-08-17 20:24:20,204 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:22,143 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:24:23,215 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/config.yaml
+2023-08-17 20:24:24,221 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:28,015 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:24:28,241 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:31,501 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-17 20:24:31,503 DEBUG   SenderThread:46898 [sender.py:send():379] send: metric
+2023-08-17 20:24:31,503 DEBUG   SenderThread:46898 [sender.py:send():379] send: metric
+2023-08-17 20:24:31,503 DEBUG   SenderThread:46898 [sender.py:send():379] send: metric
+2023-08-17 20:24:31,503 DEBUG   SenderThread:46898 [sender.py:send():379] send: history
+2023-08-17 20:24:31,503 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: summary_record
+2023-08-17 20:24:31,503 INFO    SenderThread:46898 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-17 20:24:32,258 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:32,259 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/wandb-summary.json
+2023-08-17 20:24:33,514 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:24:34,269 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:34,754 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-17 20:24:34,754 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: stop_status
+2023-08-17 20:24:36,279 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:38,997 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:24:42,306 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:44,461 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:24:46,316 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:47,069 DEBUG   SenderThread:46898 [sender.py:send():379] send: stats
+2023-08-17 20:24:49,759 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-17 20:24:49,760 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: stop_status
+2023-08-17 20:24:49,971 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:24:50,337 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:24:54,998 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:24:55,358 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/config.yaml
+2023-08-17 20:24:56,363 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:00,385 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:00,476 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:25:04,406 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:04,761 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-17 20:25:04,762 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: stop_status
+2023-08-17 20:25:06,092 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:25:08,427 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:11,463 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:25:12,443 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:16,597 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:25:17,072 DEBUG   SenderThread:46898 [sender.py:send():379] send: stats
+2023-08-17 20:25:18,471 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:19,766 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-17 20:25:19,767 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: stop_status
+2023-08-17 20:25:22,173 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:25:22,493 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:26,511 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:27,734 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:25:32,542 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:33,219 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:25:34,770 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-17 20:25:34,771 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: stop_status
+2023-08-17 20:25:36,563 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:37,280 DEBUG   SenderThread:46898 [sender.py:send():379] send: exit
+2023-08-17 20:25:37,280 INFO    SenderThread:46898 [sender.py:send_exit():584] handling exit code: 255
+2023-08-17 20:25:37,281 INFO    SenderThread:46898 [sender.py:send_exit():586] handling runtime: 140
+2023-08-17 20:25:37,282 INFO    SenderThread:46898 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-17 20:25:37,282 INFO    SenderThread:46898 [sender.py:send_exit():592] send defer
+2023-08-17 20:25:37,282 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:37,282 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 0
+2023-08-17 20:25:37,283 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:37,283 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 0
+2023-08-17 20:25:37,283 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 1
+2023-08-17 20:25:37,283 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:37,283 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 1
+2023-08-17 20:25:37,283 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:37,283 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 1
+2023-08-17 20:25:37,283 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 2
+2023-08-17 20:25:37,283 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:37,283 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 2
+2023-08-17 20:25:37,283 INFO    HandlerThread:46898 [system_monitor.py:finish():190] Stopping system monitor
+2023-08-17 20:25:37,284 INFO    HandlerThread:46898 [interfaces.py:finish():202] Joined cpu monitor
+2023-08-17 20:25:37,284 INFO    HandlerThread:46898 [interfaces.py:finish():202] Joined disk monitor
+2023-08-17 20:25:37,284 DEBUG   SystemMonitor:46898 [system_monitor.py:_start():166] Finished system metrics aggregation loop
+2023-08-17 20:25:37,285 INFO    HandlerThread:46898 [interfaces.py:finish():202] Joined gpuapple monitor
+2023-08-17 20:25:37,285 DEBUG   SystemMonitor:46898 [system_monitor.py:_start():170] Publishing last batch of metrics
+2023-08-17 20:25:37,285 INFO    HandlerThread:46898 [interfaces.py:finish():202] Joined memory monitor
+2023-08-17 20:25:37,285 INFO    HandlerThread:46898 [interfaces.py:finish():202] Joined network monitor
+2023-08-17 20:25:37,285 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:37,285 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 2
+2023-08-17 20:25:37,285 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 3
+2023-08-17 20:25:37,285 DEBUG   SenderThread:46898 [sender.py:send():379] send: stats
+2023-08-17 20:25:37,285 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:37,286 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 3
+2023-08-17 20:25:37,286 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:37,286 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 3
+2023-08-17 20:25:37,286 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 4
+2023-08-17 20:25:37,286 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:37,286 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 4
+2023-08-17 20:25:37,286 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:37,286 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 4
+2023-08-17 20:25:37,286 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 5
+2023-08-17 20:25:37,286 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:37,286 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 5
+2023-08-17 20:25:37,286 DEBUG   SenderThread:46898 [sender.py:send():379] send: summary
+2023-08-17 20:25:37,286 INFO    SenderThread:46898 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-17 20:25:37,287 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:37,287 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 5
+2023-08-17 20:25:37,287 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 6
+2023-08-17 20:25:37,287 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:37,287 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 6
+2023-08-17 20:25:37,287 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:37,287 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 6
+2023-08-17 20:25:37,287 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 7
+2023-08-17 20:25:37,287 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:25:37,287 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:37,287 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 7
+2023-08-17 20:25:37,287 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:37,287 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 7
+2023-08-17 20:25:37,569 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/wandb-summary.json
+2023-08-17 20:25:38,281 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: poll_exit
+2023-08-17 20:25:38,575 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:39,678 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 8
+2023-08-17 20:25:39,678 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: poll_exit
+2023-08-17 20:25:39,678 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:39,678 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 8
+2023-08-17 20:25:39,678 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:39,678 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 8
+2023-08-17 20:25:39,678 INFO    SenderThread:46898 [job_builder.py:build():281] Attempting to build job artifact
+2023-08-17 20:25:39,679 INFO    SenderThread:46898 [job_builder.py:_get_source_type():400] is repo sourced job
+2023-08-17 20:25:39,681 INFO    SenderThread:46898 [job_builder.py:build():374] adding wandb-job metadata file
+2023-08-17 20:25:39,686 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 9
+2023-08-17 20:25:39,686 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:39,686 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 9
+2023-08-17 20:25:39,686 DEBUG   SenderThread:46898 [sender.py:send():379] send: artifact
+2023-08-17 20:25:40,582 INFO    Thread-12 :46898 [dir_watcher.py:_on_file_modified():288] file/dir modified: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:41,446 INFO    wandb-upload_0:46898 [upload_job.py:push():89] Uploaded file /Users/nils/Library/Application Support/wandb/artifacts/staging/tmpyzgsagqw
+2023-08-17 20:25:41,446 INFO    wandb-upload_1:46898 [upload_job.py:push():89] Uploaded file /Users/nils/Library/Application Support/wandb/artifacts/staging/tmpqo8bqa_x
+2023-08-17 20:25:42,632 INFO    SenderThread:46898 [sender.py:send_artifact():1475] sent artifact job-https___github.com_sirnyls_task2.git_train_roberta.py - {'id': 'QXJ0aWZhY3Q6NTQ0NDg5MzI2', 'digest': 'a691a24878de32236bbd92f588db4efc', 'state': 'PENDING', 'aliases': [], 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjg2MzI1NDc4', 'latestArtifact': {'id': 'QXJ0aWZhY3Q6NTMwNjUwNzY5', 'versionIndex': 11}}, 'version': 'latest'}
+2023-08-17 20:25:42,632 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:42,632 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 9
+2023-08-17 20:25:42,632 INFO    SenderThread:46898 [dir_watcher.py:finish():358] shutting down directory watcher
+2023-08-17 20:25:43,299 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: keepalive
+2023-08-17 20:25:43,597 INFO    SenderThread:46898 [dir_watcher.py:finish():388] scan: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files
+2023-08-17 20:25:43,598 INFO    SenderThread:46898 [dir_watcher.py:finish():402] scan save: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/requirements.txt requirements.txt
+2023-08-17 20:25:43,598 INFO    SenderThread:46898 [dir_watcher.py:finish():402] scan save: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log output.log
+2023-08-17 20:25:43,599 INFO    SenderThread:46898 [dir_watcher.py:finish():402] scan save: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/config.yaml config.yaml
+2023-08-17 20:25:43,599 INFO    SenderThread:46898 [dir_watcher.py:finish():402] scan save: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/wandb-summary.json wandb-summary.json
+2023-08-17 20:25:43,600 INFO    SenderThread:46898 [dir_watcher.py:finish():402] scan save: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/conda-environment.yaml conda-environment.yaml
+2023-08-17 20:25:43,601 INFO    SenderThread:46898 [dir_watcher.py:finish():402] scan save: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/wandb-metadata.json wandb-metadata.json
+2023-08-17 20:25:43,601 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 10
+2023-08-17 20:25:43,603 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:43,603 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 10
+2023-08-17 20:25:43,604 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:43,604 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 10
+2023-08-17 20:25:43,604 INFO    SenderThread:46898 [file_pusher.py:finish():159] shutting down file pusher
+2023-08-17 20:25:43,984 INFO    wandb-upload_1:46898 [upload_job.py:push():131] Uploaded file /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/output.log
+2023-08-17 20:25:44,077 INFO    wandb-upload_0:46898 [upload_job.py:push():131] Uploaded file /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/requirements.txt
+2023-08-17 20:25:44,157 INFO    wandb-upload_2:46898 [upload_job.py:push():131] Uploaded file /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/config.yaml
+2023-08-17 20:25:44,160 INFO    wandb-upload_4:46898 [upload_job.py:push():131] Uploaded file /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/conda-environment.yaml
+2023-08-17 20:25:44,162 INFO    wandb-upload_3:46898 [upload_job.py:push():131] Uploaded file /Users/nils/task2/wandb/run-20230817_202316-cowchcch/files/wandb-summary.json
+2023-08-17 20:25:44,367 INFO    Thread-11 (_thread_body):46898 [sender.py:transition_state():612] send defer: 11
+2023-08-17 20:25:44,368 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:44,368 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 11
+2023-08-17 20:25:44,368 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:44,368 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 11
+2023-08-17 20:25:44,368 INFO    SenderThread:46898 [file_pusher.py:join():164] waiting for file pusher
+2023-08-17 20:25:44,368 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 12
+2023-08-17 20:25:44,368 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:44,368 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 12
+2023-08-17 20:25:44,369 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:44,369 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 12
+2023-08-17 20:25:44,369 INFO    SenderThread:46898 [file_stream.py:finish():593] file stream finish called
+2023-08-17 20:25:44,824 INFO    SenderThread:46898 [file_stream.py:finish():597] file stream finish is done
+2023-08-17 20:25:44,824 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 13
+2023-08-17 20:25:44,824 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:44,824 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 13
+2023-08-17 20:25:44,824 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: status_report
+2023-08-17 20:25:44,824 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:44,824 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 13
+2023-08-17 20:25:44,824 INFO    SenderThread:46898 [sender.py:transition_state():612] send defer: 14
+2023-08-17 20:25:44,825 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: defer
+2023-08-17 20:25:44,825 INFO    HandlerThread:46898 [handler.py:handle_request_defer():170] handle defer: 14
+2023-08-17 20:25:44,825 DEBUG   SenderThread:46898 [sender.py:send():379] send: final
+2023-08-17 20:25:44,825 DEBUG   SenderThread:46898 [sender.py:send():379] send: footer
+2023-08-17 20:25:44,825 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: defer
+2023-08-17 20:25:44,825 INFO    SenderThread:46898 [sender.py:send_request_defer():608] handle sender defer: 14
+2023-08-17 20:25:44,826 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: poll_exit
+2023-08-17 20:25:44,826 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: poll_exit
+2023-08-17 20:25:44,826 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: server_info
+2023-08-17 20:25:44,827 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: get_summary
+2023-08-17 20:25:44,827 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: sampled_history
+2023-08-17 20:25:44,827 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: job_info
+2023-08-17 20:25:44,827 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: server_info
+2023-08-17 20:25:44,973 DEBUG   SenderThread:46898 [sender.py:send_request():406] send_request: job_info
+2023-08-17 20:25:44,974 INFO    MainThread:46898 [wandb_run.py:_footer_history_summary_info():3481] rendering history
+2023-08-17 20:25:44,974 INFO    MainThread:46898 [wandb_run.py:_footer_history_summary_info():3513] rendering summary
+2023-08-17 20:25:44,974 INFO    MainThread:46898 [wandb_run.py:_footer_sync_info():3440] logging synced files
+2023-08-17 20:25:44,975 DEBUG   HandlerThread:46898 [handler.py:handle_request():144] handle_request: shutdown
+2023-08-17 20:25:44,975 INFO    HandlerThread:46898 [handler.py:finish():857] shutting down handler
+2023-08-17 20:25:45,832 INFO    WriterThread:46898 [datastore.py:close():294] close: /Users/nils/task2/wandb/run-20230817_202316-cowchcch/run-cowchcch.wandb
+2023-08-17 20:25:45,979 INFO    SenderThread:46898 [sender.py:finish():1552] shutting down sender
+2023-08-17 20:25:45,979 INFO    SenderThread:46898 [file_pusher.py:finish():159] shutting down file pusher
+2023-08-17 20:25:45,979 INFO    SenderThread:46898 [file_pusher.py:join():164] waiting for file pusher

@@ -1,0 +1,69 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  1%|▌                                                                                                   | 15/2625 [01:11<3:15:39,  4.50s/it]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  1%|█                                                                                                   | 29/2625 [02:14<3:15:38,  4.52s/it]Traceback (most recent call last):
+  File "/Users/nils/task2/train_roberta.py", line 205, in <module>
+    trainer.train()
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/transformers/trainer.py", line 1539, in train
+    return inner_training_loop(
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/transformers/trainer.py", line 1809, in _inner_training_loop
+    tr_loss_step = self.training_step(model, inputs)
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/transformers/trainer.py", line 2654, in training_step
+    loss = self.compute_loss(model, inputs)
+  File "/Users/nils/task2/train_roberta.py", line 89, in compute_loss
+    outputs = model(**inputs)
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/transformers/models/roberta/modeling_roberta.py", line 1196, in forward
+    outputs = self.roberta(
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/transformers/models/roberta/modeling_roberta.py", line 844, in forward
+    encoder_outputs = self.encoder(
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/transformers/models/roberta/modeling_roberta.py", line 529, in forward
+    layer_outputs = layer_module(
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/transformers/models/roberta/modeling_roberta.py", line 413, in forward
+    self_attention_outputs = self.attention(
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/transformers/models/roberta/modeling_roberta.py", line 340, in forward
+    self_outputs = self.self(
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/transformers/models/roberta/modeling_roberta.py", line 266, in forward
+    attention_probs = nn.functional.softmax(attention_scores, dim=-1)
+  File "/Users/nils/miniconda3/envs/test/lib/python3.10/site-packages/torch/nn/functional.py", line 1813, in softmax
+    def softmax(input: Tensor, dim: Optional[int] = None, _stacklevel: int = 3, dtype: Optional[DType] = None) -> Tensor:
+KeyboardInterrupt

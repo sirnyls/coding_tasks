@@ -77,8 +77,23 @@ def tokenize(batch):
 def model_init():
     transformers.set_seed(42)
     m = RobertaForSequenceClassification.from_pretrained(logs_path+"models/"+run_name, num_labels=2,device_map='auto')
-    m.roberta.apply(freeze_weights)
+    
+    #m.roberta.apply(freeze_weights)
+
+    ### new fine tune approach
+    # Freeze base layers of RoBERTa
+    for param in m.roberta.parameters():
+        param.requires_grad = False
+
+    # Fine-tune the classification head
+    for name, param in m.classifier.named_parameters():
+        param.requires_grad = True
+    
+    ## end of fine tune approach
+
     return m
+
+
 
 class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False):

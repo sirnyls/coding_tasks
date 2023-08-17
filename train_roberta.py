@@ -12,6 +12,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import class_weight
 from torch import nn
 import transformers
+from transformers import get_linear_schedule_with_warmup
+from torch.utils.data import DataLoader
 import wandb
 
 def compute_metrics_discrete(eval_pred):
@@ -94,26 +96,43 @@ def model_init():
     return m
 
 
-class CustomTrainer(Trainer):
-    def compute_loss(self, model, inputs, return_outputs=False):
+class CustomTrainer:
+    def __init__(self, model_init, args, train_dataset, eval_dataset, compute_metrics):
+        self.model_init = model_init
+        self.args = args
+        self.train_dataset = train_dataset
+        self.eval_dataset = eval_dataset
+        self.compute_metrics = compute_metrics
+
+        self.model = self.model_init()
+        self.optimizer = AdamW(self.model.parameters(), lr=self.args.learning_rate)
+        self.scheduler = get_linear_schedule_with_warmup(
+            self.optimizer,
+            num_warmup_steps=int(self.args.warmup_steps),
+            num_training_steps=len(self.train_dataset) // self.args.per_device_train_batch_size,
+        )
+
+        self.global_step = 0
+
+    def compute_loss(self, model, inputs):
         labels = inputs.get("labels")
-        # forward pass
         outputs = model(**inputs)
-        #logits = outputs.get("logits")
         logits = outputs.logits
-        # compute custom loss (suppose one has 2 labels with different weights)
-        loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(class_weights, device=model.device,dtype=torch.float))
-        
-        loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
-        return (loss, outputs) if return_outputs else loss
-    def train(self, model_path=None):
-        train_dataloader = self.get_train_dataloader()
-        for epoch in range(self.epoch, self.args.num_train_epochs):
-            self.epoch = epoch
+        loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(class_weights, device=model.device, dtype=torch.float))
+        loss = loss_fct(logits.view(-1, model.config.num_labels), labels.view(-1))
+        return loss
+
+    def train(self):
+        train_dataloader = DataLoader(
+            self.train_dataset,
+            batch_size=self.args.per_device_train_batch_size,
+            shuffle=True,
+            collate_fn=self.train_dataset.collate,
+        )
+
+        for epoch in range(self.args.num_train_epochs):
             for step, inputs in enumerate(train_dataloader):
                 self.global_step += 1
-                self.epoch_iterator = train_dataloader
-
                 loss = self.compute_loss(self.model, inputs)
                 loss.backward()
                 self.optimizer.step()
@@ -121,25 +140,43 @@ class CustomTrainer(Trainer):
                 self.optimizer.zero_grad()
 
                 if self.global_step % self.args.logging_steps == 0:
-                    self.log_metrics("train", loss.item())
+                    print(f"Step {self.global_step}, Loss: {loss.item()}")
 
-                if self.args.save_steps > 0 and self.global_step % self.args.save_steps == 0:
-                    self.save_model()
+            # Add your evaluation step here
+            self.evaluate()
 
-                if self.args.eval_steps > 0 and self.global_step % self.args.eval_steps == 0:
-                    self.evaluate()
+    def evaluate(self):
+        eval_dataloader = DataLoader(
+            self.eval_dataset,
+            batch_size=self.args.per_device_eval_batch_size,
+            shuffle=False,
+            collate_fn=self.eval_dataset.collate,
+        )
 
-                if self.args.logging_steps > 0 and self.global_step % self.args.logging_steps == 0:
-                    logs = {**self.state.metrics, **self.control}
-                    self._log(logs)
+        self.model.eval()
+        all_logits = []
+        all_labels = []
 
-        return TrainOutput(global_step=self.global_step, training_loss=self.state.metrics["train_loss"])
-    
+        with torch.no_grad():
+            for inputs in eval_dataloader:
+                outputs = self.model(**inputs)
+                logits = outputs.logits
+                all_logits.append(logits)
+                all_labels.append(inputs["labels"])
+
+        all_logits = torch.cat(all_logits, dim=0)
+        all_labels = torch.cat(all_labels, dim=0)
+
+        eval_metrics = self.compute_metrics((all_logits, all_labels))
+        print("Evaluation metrics:", eval_metrics)
+
+        self.model.train()
+
+
 
 def freeze_weights(m):
     for name, param in m.named_parameters():
         param.requires_grad = False  
-
 
 
 

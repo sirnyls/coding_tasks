@@ -1,0 +1,34 @@
+{
+    "os": "macOS-13.4-arm64-arm-64bit",
+    "python": "3.10.12",
+    "heartbeatAt": "2023-08-17T18:23:17.053548",
+    "startedAt": "2023-08-17T18:23:16.385316",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/Users/nils/task2/train_roberta.py",
+    "codePath": "train_roberta.py",
+    "git": {
+        "remote": "https://github.com/sirnyls/task2.git",
+        "commit": "7a187fa2476a817b7126d12e1edf3384d7da2cda"
+    },
+    "email": null,
+    "root": "/Users/nils/task2",
+    "host": "MBP-von-Nils",
+    "username": "nils",
+    "executable": "/Users/nils/miniconda3/envs/test/bin/python",
+    "cpu_count": 10,
+    "cpu_count_logical": 10,
+    "disk": {
+        "total": 460.4317207336426,
+        "used": 8.443134307861328
+    },
+    "gpuapple": {
+        "type": "arm",
+        "vendor": "Apple"
+    },
+    "memory": {
+        "total": 16.0
+    }
+}
