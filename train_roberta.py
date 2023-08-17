@@ -115,7 +115,7 @@ class CustomTrainer:
         self.global_step = 0
 
     def compute_loss(self, model, inputs):
-        labels = inputs.pop("helpfulness")
+        labels = inputs["label"]  # Make sure to use "label" instead of "labels"
         outputs = model(**inputs)
         logits = outputs.logits
         loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(class_weights, device=model.device, dtype=torch.float))
@@ -257,6 +257,7 @@ test_dataset = test_dataset.map(tokenize, batched=True, batch_size=len(test_data
 train_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 val_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 test_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
+
 
 training_args = TrainingArguments(
     output_dir=logs_path+'results/'+run_name,
