@@ -115,7 +115,7 @@ class CustomTrainer:
         self.global_step = 0
 
     def compute_loss(self, model, inputs):
-        labels = inputs.get("labels")
+        labels = inputs.pop("labels")
         outputs = model(**inputs)
         logits = outputs.logits
         loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(class_weights, device=model.device, dtype=torch.float))
