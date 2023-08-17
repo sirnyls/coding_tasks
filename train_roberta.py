@@ -114,13 +114,15 @@ class CustomTrainer:
 
         self.global_step = 0
 
-    def compute_loss(self, model, inputs):
-        labels = inputs["label"]  # Make sure to use "label" instead of "labels"
+    def compute_loss(self, model, inputs, return_outputs=False):
+        labels = inputs.pop("labels")  # Remove "labels" from inputs and store it
         outputs = model(**inputs)
         logits = outputs.logits
+
         loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(class_weights, device=model.device, dtype=torch.float))
         loss = loss_fct(logits.view(-1, model.config.num_labels), labels.view(-1))
-        return loss
+        
+        return (loss, outputs) if return_outputs else loss
 
     def train(self):
         train_dataloader = DataLoader(self.train_dataset, batch_size=self.args.per_device_train_batch_size, shuffle=True)
@@ -289,6 +291,7 @@ trainer = CustomTrainer(
     eval_dataset=val_dataset,
     compute_metrics=compute_metrics_discrete,
 )
+
 trainer.train()
 
 print("##### VALIDATION RESULTS#####")
