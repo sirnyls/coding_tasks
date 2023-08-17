@@ -76,11 +76,23 @@ def tokenize(batch):
 
 def model_init():
     transformers.set_seed(42)
-    m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2, device_map='auto')
-    m.roberta.apply(freeze_weights)
+    m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2,device_map='auto')
+    
+    #m.roberta.apply(freeze_weights)
+
+    ### new fine tune approach
+    # Freeze base layers of RoBERTa
+    for param in m.roberta.parameters():
+        param.requires_grad = False
+
+    # Fine-tune the classification head
     for name, param in m.classifier.named_parameters():
         param.requires_grad = True
+    
+    ## end of fine tune approach
+
     return m
+
 
 class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False):
@@ -94,11 +106,41 @@ class CustomTrainer(Trainer):
         
         loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
         return (loss, outputs) if return_outputs else loss
+    def train(self, model_path=None):
+        train_dataloader = self.get_train_dataloader()
+        for epoch in range(self.epoch, self.args.num_train_epochs):
+            self.epoch = epoch
+            for step, inputs in enumerate(train_dataloader):
+                self.global_step += 1
+                self.epoch_iterator = train_dataloader
+
+                loss = self.compute_loss(self.model, inputs)
+                loss.backward()
+                self.optimizer.step()
+                self.scheduler.step()
+                self.optimizer.zero_grad()
+
+                if self.global_step % self.args.logging_steps == 0:
+                    self.log_metrics("train", loss.item())
+
+                if self.args.save_steps > 0 and self.global_step % self.args.save_steps == 0:
+                    self.save_model()
+
+                if self.args.eval_steps > 0 and self.global_step % self.args.eval_steps == 0:
+                    self.evaluate()
+
+                if self.args.logging_steps > 0 and self.global_step % self.args.logging_steps == 0:
+                    logs = {**self.state.metrics, **self.control}
+                    self._log(logs)
+
+        return TrainOutput(global_step=self.global_step, training_loss=self.state.metrics["train_loss"])
     
 
 def freeze_weights(m):
     for name, param in m.named_parameters():
         param.requires_grad = False  
+
+
 
 
 sweep_config = {
@@ -193,6 +235,8 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,
     metric_for_best_model=decision_metric,
     greater_is_better=True,
+    save_steps=500,  
+    eval_steps=500, 
 )
 
 trainer = CustomTrainer(
