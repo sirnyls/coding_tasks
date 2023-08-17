@@ -217,4 +217,4 @@ print("Dataset: ",dataset)
 print("Decision metric ",'test_',d_metric,": ",res.metrics['test_'+d_metric])
 
 
-trainer.save_model(logs_path+"models/"+run_name)2
+trainer.save_model(logs_path+"models/"+run_name)
