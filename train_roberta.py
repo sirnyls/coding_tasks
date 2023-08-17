@@ -123,27 +123,32 @@ class CustomTrainer:
         return loss
 
     def train(self):
-        train_dataloader = DataLoader(
-            self.train_dataset,
-            batch_size=self.args.per_device_train_batch_size,
-            shuffle=True,
-            collate_fn=self.train_dataset.collate,
-        )
-
+        train_dataloader = DataLoader(self.train_dataset, batch_size=self.args.per_device_train_batch_size, shuffle=True)
         for epoch in range(self.args.num_train_epochs):
             for step, inputs in enumerate(train_dataloader):
                 self.global_step += 1
+                self.epoch_iterator = train_dataloader
+
                 loss = self.compute_loss(self.model, inputs)
                 loss.backward()
                 self.optimizer.step()
-                self.scheduler.step()
+                self.scheduler.step()  # Scheduler step
                 self.optimizer.zero_grad()
 
                 if self.global_step % self.args.logging_steps == 0:
-                    print(f"Step {self.global_step}, Loss: {loss.item()}")
+                    self.log_metrics("train", loss.item())
 
-            # Add your evaluation step here
-            self.evaluate()
+                if self.args.save_steps > 0 and self.global_step % self.args.save_steps == 0:
+                    self.save_model()
+
+                if self.args.eval_steps > 0 and self.global_step % self.args.eval_steps == 0:
+                    self.evaluate()
+
+                if self.args.logging_steps > 0 and self.global_step % self.args.logging_steps == 0:
+                    logs = {**self.state.metrics, **self.control}
+                    self._log(logs)
+
+        return self.state
 
     def evaluate(self):
         eval_dataloader = DataLoader(
