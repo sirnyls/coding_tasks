@@ -3,18 +3,14 @@ from sklearn.model_selection import train_test_split
 from transformers import RobertaTokenizer, RobertaForSequenceClassification
 from torch.utils.data import DataLoader
 import torch
+import numpy as np
 
 # 1. Load the dataset
 data=pd.read_csv("final_results_paws.csv")
-dataset='PAWS'
-outcome_variable='helpfulness'
+#dataset='PAWS'
+#outcome_variable='helpfulness'
 
-if dataset in ['PAWS']:
-    data=data.assign(text="Sentence 1: "+data.premise_+"\nAMR 1: "+data.amr_p+"\nSentence 2: "+data.hypothesis_+"\nAMR 2: "+data.amr_h)
-elif dataset in ['translation','logic','django','spider']:
-    data=data.assign(text="Text: "+data.text+"\nAMR: "+data.amr)
-elif dataset in ['pubmed']:
-    data=data.assign(text="Text: "+data.text+"\nInteraction: "+data.interaction+"\nAMR: "+data.amr)
+data=data.assign(text="Sentence 1: "+data.premise_+"\nAMR 1: "+data.amr_p+"\nSentence 2: "+data.hypothesis_+"\nAMR 2: "+data.amr_h)
 data=data.assign(label=np.where(data.helpfulness<=0,0,1))
 data=data.loc[:,['id','text','label']]
 data=data.loc[~data.text.isna()]
