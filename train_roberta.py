@@ -13,9 +13,6 @@ from sklearn.utils import class_weight
 from torch import nn
 import transformers
 import wandb
-from transformers import get_linear_schedule_with_warmup
-import os
-from imblearn.over_sampling import SMOTE
 
 def compute_metrics_discrete(eval_pred):
     logits, labels = eval_pred
@@ -77,12 +74,9 @@ def split_sets(dataset,df):
 def tokenize(batch):
     return tokenizer(batch["text"], padding=True, truncation=True, max_length=512)
 
-
-
 def model_init():
     transformers.set_seed(42)
     m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2,device_map='auto')
-    m.classifier.dropout.p = 0.3  # Adjust the dropout probability as needed
     m.roberta.apply(freeze_weights)
     for name, param in m.classifier.named_parameters():
         param.requires_grad = True
@@ -119,7 +113,7 @@ parameters_dict = {
 """
 parameters_dict = {
     "learning_rate": {"values": [2e-5]},
-    "per_device_train_batch_size": {"values": [8 ]},
+    "per_device_train_batch_size": {"values": [32 ]},
     }
 sweep_config['parameters'] = parameters_dict
 
@@ -130,7 +124,7 @@ sweep_config['metric'] = metric
 dataset='PAWS'
 #datasets=['PAWS','translation','pubmed','logic','django','spider']
 ## True for balancing the observations in the loss function (currently not working)
-
+compute_weights=False
 current=-1
 d_metric='f1_1'
 amr_flag=True
@@ -138,11 +132,12 @@ decision_metric='eval_'+d_metric
 outcome_variable='helpfulness'
 ## final results files
 ##https://drive.google.com/drive/folders/17pwdiiu7U1oyly8YwMtqCRdu3GBIWT3K
-file_path='final_results_paws.csv'
-logs_path=''
+file_path='../../processed/files/final_results_paws.csv'
+logs_path='../../processed/modeling/'
 run_name=dataset+"_hyp_final_"+outcome_variable
 
 df=process_data(file_path=file_path,dataset=dataset,amr=amr_flag,outcome_variable=outcome_variable)
+
 
 class_0 = df[df['label'] == 0].sample(n=1000, random_state=42)
 class_1 = df[df['label'] == 1]
@@ -150,7 +145,6 @@ class_1 = df[df['label'] == 1]
 balanced_df = pd.concat([class_0, class_1], axis=0).sample(frac=1, random_state=42).reset_index(drop=True)
 
 train_set,dev_set,test_set=split_sets(dataset=dataset,df=balanced_df)
-
 
 
 ## prepare sets
@@ -164,7 +158,6 @@ test_dataset=Dataset.from_pandas(test_set)
 train_dataset = train_dataset.map(tokenize, batched=True, batch_size=len(train_dataset))
 val_dataset = val_dataset.map(tokenize, batched=True, batch_size=len(val_dataset))
 test_dataset = test_dataset.map(tokenize, batched=True, batch_size=len(test_dataset))
-
 train_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 val_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 test_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
@@ -175,8 +168,8 @@ training_args = TrainingArguments(
     evaluation_strategy='epoch',
     save_strategy='epoch',
     learning_rate=2e-5,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=32,
     save_total_limit=1,
     num_train_epochs=15,
     weight_decay=0.01,
@@ -190,7 +183,6 @@ training_args = TrainingArguments(
     greater_is_better=True,
 )
 
-
 trainer = CustomTrainer(
     model_init=model_init,
     args=training_args,
@@ -198,8 +190,6 @@ trainer = CustomTrainer(
     eval_dataset=val_dataset,
     compute_metrics=compute_metrics_discrete,
 )
-
-
 trainer.train()
 
 print("##### VALIDATION RESULTS#####")
