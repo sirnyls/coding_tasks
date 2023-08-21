@@ -206,11 +206,6 @@ trainer = CustomTrainer(
     compute_metrics=compute_metrics_discrete,
 )
 
-scheduler = get_linear_schedule_with_warmup(
-    trainer.optimizer, num_warmup_steps=training_args.warmup_steps, num_training_steps=len(train_dataset) // training_args.per_device_train_batch_size * training_args.num_train_epochs
-)
-trainer.optimizer.set_scheduler(scheduler)
-
 
 trainer.train()
 
