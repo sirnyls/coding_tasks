@@ -138,9 +138,13 @@ run_name=dataset+"_hyp_final_"+outcome_variable
 
 df=process_data(file_path=file_path,dataset=dataset,amr=amr_flag,outcome_variable=outcome_variable)
 
+if dataset in ['PAWS','translation']:
+    class_0 = df[df['label'] == 0].sample(n=1000, random_state=42)
+    class_1 = df[df['label'] == 1]
+else: 
+    class_0 = df[df['label'] == 0].sample(n=500, random_state=42)
+    class_1 = df[df['label'] == 1] 
 
-class_0 = df[df['label'] == 0].sample(n=1000, random_state=42)
-class_1 = df[df['label'] == 1]
 
 balanced_df = pd.concat([class_0, class_1], axis=0).sample(frac=1, random_state=42).reset_index(drop=True)
 
