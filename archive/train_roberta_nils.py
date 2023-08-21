@@ -182,8 +182,8 @@ training_args = TrainingArguments(
     evaluation_strategy='epoch',
     save_strategy='epoch',
     learning_rate=2e-5,
-    per_device_train_batch_size=32,
-    per_device_eval_batch_size=32,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
     save_total_limit=1,
     num_train_epochs=15,
     weight_decay=0.01,
@@ -207,10 +207,6 @@ trainer = CustomTrainer(
 )
 torch.cuda.empty_cache()
 
-scheduler = get_linear_schedule_with_warmup(
-    trainer.optimizer, num_warmup_steps=training_args.warmup_steps, num_training_steps=len(train_dataset) // training_args.per_device_train_batch_size * training_args.num_train_epochs
-)
-trainer.optimizer.set_scheduler(scheduler)
 
 trainer.train()
 
