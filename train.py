@@ -43,8 +43,8 @@ train_dataset = tokenize_data(train_data)
 val_dataset = tokenize_data(val_data)
 
 # 3. Prepare data loaders
-train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=8)
+train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=4)
 
 # 4. Load the model
 model = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2).to(device)
