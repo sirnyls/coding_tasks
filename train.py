@@ -34,21 +34,10 @@ class CustomDataset(Dataset):
     def __len__(self):
         return len(self.labels)
 
-# Update the tokenize_data function
 def tokenize_data(data):
     tokenized = tokenizer(data['text'].tolist(), padding=True, truncation=True, max_length=512, return_tensors='pt')
     labels = torch.tensor(data['label'].tolist())
     return CustomDataset(tokenized, labels)
-
-train_dataset = tokenize_data(train_data)
-val_dataset = tokenize_data(val_data)
-
-
-
-def tokenize_data(data):
-    tokenized = tokenizer(data['text'].tolist(), padding=True, truncation=True, max_length=512, return_tensors='pt')
-    tokenized['label'] = torch.tensor(data['label'].tolist())
-    return tokenized
 
 train_dataset = tokenize_data(train_data)
 val_dataset = tokenize_data(val_data)
