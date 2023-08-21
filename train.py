@@ -17,6 +17,9 @@ data = data.loc[~data.text.isna()]
 
 train_data, val_data = train_test_split(data, test_size=0.1, stratify=data['label'])
 
+# 2. Tokenize the data
+tokenizer = RobertaTokenizer.from_pretrained('roberta-large')
+
 
 class CustomDataset(Dataset):
     def __init__(self, encodings, labels):
@@ -40,8 +43,7 @@ def tokenize_data(data):
 train_dataset = tokenize_data(train_data)
 val_dataset = tokenize_data(val_data)
 
-# 2. Tokenize the data
-tokenizer = RobertaTokenizer.from_pretrained('roberta-large')
+
 
 def tokenize_data(data):
     tokenized = tokenizer(data['text'].tolist(), padding=True, truncation=True, max_length=512, return_tensors='pt')
