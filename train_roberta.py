@@ -14,8 +14,8 @@ from torch import nn
 import transformers
 import wandb
 from transformers import get_linear_schedule_with_warmup
-
-
+import os
+os.environ['PYTORCH_MPS_HIGH_WATERMARK_RATIO'] = '0.0'
 
 def compute_metrics_discrete(eval_pred):
     logits, labels = eval_pred
@@ -182,8 +182,8 @@ training_args = TrainingArguments(
     evaluation_strategy='epoch',
     save_strategy='epoch',
     learning_rate=2e-5,
-    per_device_train_batch_size=16,
-    per_device_eval_batch_size=16,
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=32,
     save_total_limit=1,
     num_train_epochs=15,
     weight_decay=0.01,
@@ -205,6 +205,12 @@ trainer = CustomTrainer(
     eval_dataset=val_dataset,
     compute_metrics=compute_metrics_discrete,
 )
+torch.cuda.empty_cache()
+
+scheduler = get_linear_schedule_with_warmup(
+    trainer.optimizer, num_warmup_steps=training_args.warmup_steps, num_training_steps=len(train_dataset) // training_args.per_device_train_batch_size * training_args.num_train_epochs
+)
+trainer.optimizer.set_scheduler(scheduler)
 
 trainer.train()
 
