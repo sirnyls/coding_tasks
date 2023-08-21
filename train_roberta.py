@@ -146,6 +146,19 @@ balanced_df = pd.concat([class_0, class_1], axis=0).sample(frac=1, random_state=
 
 train_set,dev_set,test_set=split_sets(dataset=dataset,df=balanced_df)
 
+if compute_weights:
+    class_weights=class_weight.compute_class_weight(class_weight='balanced',classes=train_set.label.unique(),y=train_set.label.values)
+else:
+    ## same weights but balance dataset
+    class_weights=np.ones(df.label.unique().shape[0])
+    value_counts = train_set['label'].value_counts()
+    min_count = value_counts.min()
+    balanced_df = []
+    for value in value_counts.index:
+        subset = train_set[train_set['label'] == value]
+        resampled_subset = subset.sample(min_count, replace=True)
+        balanced_df.append(resampled_subset)
+    train_set = pd.concat(balanced_df)
 
 ## prepare sets
 set_seed(42)
