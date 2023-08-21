@@ -5,15 +5,15 @@ from torch.utils.data import DataLoader
 import torch
 import numpy as np
 
-# 1. Load the dataset
-data=pd.read_csv("final_results_paws.csv")
-#dataset='PAWS'
-#outcome_variable='helpfulness'
+# Set device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-data=data.assign(text="Sentence 1: "+data.premise_+"\nAMR 1: "+data.amr_p+"\nSentence 2: "+data.hypothesis_+"\nAMR 2: "+data.amr_h)
-data=data.assign(label=np.where(data.helpfulness<=0,0,1))
-data=data.loc[:,['id','text','label']]
-data=data.loc[~data.text.isna()]
+# 1. Load the dataset
+data = pd.read_csv("final_results_paws.csv")
+data = data.assign(text="Sentence 1: " + data.premise_ + "\nAMR 1: " + data.amr_p + "\nSentence 2: " + data.hypothesis_ + "\nAMR 2: " + data.amr_h)
+data = data.assign(label=np.where(data.helpfulness <= 0, 0, 1))
+data = data.loc[:, ['id', 'text', 'label']]
+data = data.loc[~data.text.isna()]
 
 train_data, val_data = train_test_split(data, test_size=0.1, stratify=data['label'])
 
@@ -33,19 +33,19 @@ train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=8)
 
 # 4. Load the model
-model = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2).cuda()
+model = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2).to(device)
 
 # 5. Train the model
-EPOCHS = 3  # You can adjust the number of epochs as needed
+EPOCHS = 3
 optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
 criterion = torch.nn.CrossEntropyLoss()
 
 for epoch in range(EPOCHS):
     model.train()
     for batch in train_loader:
-        inputs = batch['input_ids'].cuda()
-        attention_mask = batch['attention_mask'].cuda()
-        labels = batch['label'].cuda()
+        inputs = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
+        labels = batch['label'].to(device)
 
         optimizer.zero_grad()
         outputs = model(inputs, attention_mask=attention_mask)[0]
@@ -53,14 +53,14 @@ for epoch in range(EPOCHS):
         loss.backward()
         optimizer.step()
 
-    # Validation (you can expand this part for more comprehensive validation metrics)
+    # Validation
     model.eval()
     total_correct = 0
     total_count = 0
     for batch in val_loader:
-        inputs = batch['input_ids'].cuda()
-        attention_mask = batch['attention_mask'].cuda()
-        labels = batch['label'].cuda()
+        inputs = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
+        labels = batch['label'].to(device)
 
         with torch.no_grad():
             outputs = model(inputs, attention_mask=attention_mask)[0]
