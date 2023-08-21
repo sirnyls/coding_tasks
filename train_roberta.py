@@ -12,9 +12,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import class_weight
 from torch import nn
 import transformers
-from transformers import get_linear_schedule_with_warmup
-from torch.utils.data import DataLoader
 import wandb
+from transformers import get_linear_schedule_with_warmup
+
+
 
 def compute_metrics_discrete(eval_pred):
     logits, labels = eval_pred
@@ -76,115 +77,33 @@ def split_sets(dataset,df):
 def tokenize(batch):
     return tokenizer(batch["text"], padding=True, truncation=True, max_length=512)
 
+
 def model_init():
     transformers.set_seed(42)
-    m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2,device_map='auto')
-    
-    #m.roberta.apply(freeze_weights)
-
-    ### new fine tune approach
-    # Freeze base layers of RoBERTa
-    for param in m.roberta.parameters():
-        param.requires_grad = False
-
-    # Fine-tune the classification head
+    m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2, device_map='auto')
+    m.classifier.dropout.p = 0.5  # Adjust the dropout probability as needed
+    # Unfreeze the last two layers
+    for name, param in list(m.roberta.named_parameters())[-4:]:
+        param.requires_grad = True
     for name, param in m.classifier.named_parameters():
         param.requires_grad = True
-    
-    ## end of fine tune approach
-
     return m
 
 
-class CustomTrainer:
-    def __init__(self, model_init, args, train_dataset, eval_dataset, compute_metrics):
-        self.model_init = model_init
-        self.args = args
-        self.train_dataset = train_dataset
-        self.eval_dataset = eval_dataset
-        self.compute_metrics = compute_metrics
-
-        self.model = self.model_init()
-        self.optimizer = AdamW(self.model.parameters(), lr=self.args.learning_rate)
-        self.scheduler = get_linear_schedule_with_warmup(
-            self.optimizer,
-            num_warmup_steps=int(self.args.warmup_steps),
-            num_training_steps=len(self.train_dataset) // self.args.per_device_train_batch_size,
-        )
-
-        self.global_step = 0
-
+class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False):
-        labels = inputs.pop("labels")  # Remove "labels" from inputs and store it
+        labels = inputs.get("labels")
+        # forward pass
         outputs = model(**inputs)
-        logits = outputs.logits
-
-        loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(class_weights, device=model.device, dtype=torch.float))
-        loss = loss_fct(logits.view(-1, model.config.num_labels), labels.view(-1))
-        
+        logits = outputs.get("logits")
+        # compute custom loss (suppose one has 2 labels with different weights)
+        loss_fct = nn.CrossEntropyLoss(weight=torch.tensor(class_weights, device=model.device,dtype=torch.float))
+        loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
         return (loss, outputs) if return_outputs else loss
-
-    def train(self):
-        train_dataloader = DataLoader(self.train_dataset, batch_size=self.args.per_device_train_batch_size, shuffle=True)
-        for epoch in range(self.args.num_train_epochs):
-            for step, inputs in enumerate(train_dataloader):
-                self.global_step += 1
-                self.epoch_iterator = train_dataloader
-
-                loss = self.compute_loss(self.model, inputs)
-                loss.backward()
-                self.optimizer.step()
-                self.scheduler.step()  # Scheduler step
-                self.optimizer.zero_grad()
-
-                if self.global_step % self.args.logging_steps == 0:
-                    self.log_metrics("train", loss.item())
-
-                if self.args.save_steps > 0 and self.global_step % self.args.save_steps == 0:
-                    self.save_model()
-
-                if self.args.eval_steps > 0 and self.global_step % self.args.eval_steps == 0:
-                    self.evaluate()
-
-                if self.args.logging_steps > 0 and self.global_step % self.args.logging_steps == 0:
-                    logs = {**self.state.metrics, **self.control}
-                    self._log(logs)
-
-        return self.state
-
-    def evaluate(self):
-        eval_dataloader = DataLoader(
-            self.eval_dataset,
-            batch_size=self.args.per_device_eval_batch_size,
-            shuffle=False,
-            collate_fn=self.eval_dataset.collate,
-        )
-
-        self.model.eval()
-        all_logits = []
-        all_labels = []
-
-        with torch.no_grad():
-            for inputs in eval_dataloader:
-                outputs = self.model(**inputs)
-                logits = outputs.logits
-                all_logits.append(logits)
-                all_labels.append(inputs["labels"])
-
-        all_logits = torch.cat(all_logits, dim=0)
-        all_labels = torch.cat(all_labels, dim=0)
-
-        eval_metrics = self.compute_metrics((all_logits, all_labels))
-        print("Evaluation metrics:", eval_metrics)
-
-        self.model.train()
-
-
 
 def freeze_weights(m):
     for name, param in m.named_parameters():
         param.requires_grad = False  
-
 
 
 sweep_config = {
@@ -213,7 +132,7 @@ sweep_config['metric'] = metric
 dataset='PAWS'
 #datasets=['PAWS','translation','pubmed','logic','django','spider']
 ## True for balancing the observations in the loss function (currently not working)
-compute_weights=True
+compute_weights=False
 current=-1
 d_metric='f1_1'
 amr_flag=True
@@ -229,10 +148,7 @@ df=process_data(file_path=file_path,dataset=dataset,amr=amr_flag,outcome_variabl
 train_set,dev_set,test_set=split_sets(dataset=dataset,df=df)
 
 if compute_weights:
-    #class_weights=class_weight.compute_class_weight(class_weight='balanced',classes=train_set.label.unique(),y=train_set.label.values)
-    # use new class_weights approach
-    class_weights = class_weight.compute_class_weight('balanced', classes=np.unique(train_set.label), y=train_set.label)
-
+    class_weights=class_weight.compute_class_weight(class_weight='balanced',classes=train_set.label.unique(),y=train_set.label.values)
 else:
     ## same weights but balance dataset
     class_weights=np.ones(df.label.unique().shape[0])
@@ -260,7 +176,6 @@ train_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label
 val_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 test_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 
-
 training_args = TrainingArguments(
     output_dir=logs_path+'results/'+run_name,
     report_to=None,
@@ -280,9 +195,12 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,
     metric_for_best_model=decision_metric,
     greater_is_better=True,
-    save_steps=500,  
-    eval_steps=500, 
 )
+
+scheduler = get_linear_schedule_with_warmup(
+    trainer.optimizer, num_warmup_steps=training_args.warmup_steps, num_training_steps=len(train_dataset) // training_args.per_device_train_batch_size * training_args.num_train_epochs
+)
+trainer.optimizer.set_scheduler(scheduler)
 
 trainer = CustomTrainer(
     model_init=model_init,
@@ -291,7 +209,6 @@ trainer = CustomTrainer(
     eval_dataset=val_dataset,
     compute_metrics=compute_metrics_discrete,
 )
-
 trainer.train()
 
 print("##### VALIDATION RESULTS#####")
