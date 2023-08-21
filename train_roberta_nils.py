@@ -1,21 +1,21 @@
 import pandas as pd
-from transformers import RobertaTokenizer, RobertaForSequenceClassification, AdamW, get_linear_schedule_with_warmup
+from transformers import RobertaTokenizer, RobertaForSequenceClassification, AdamW
 import torch
 from transformers import Trainer, TrainingArguments
 import numpy as np
 from datasets import Dataset, DatasetDict
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
-from transformers import set_seed, EarlyStoppingCallback
+from transformers import set_seed
 from sklearn.metrics import mean_squared_error,mean_absolute_error,r2_score,classification_report
 from datasets import load_metric
 from sklearn.model_selection import train_test_split
 from sklearn.utils import class_weight
 from torch import nn
 import transformers
-import torch.nn.functional as F
 import wandb
-import optuna
-
+from transformers import get_linear_schedule_with_warmup
+import os
+os.environ['PYTORCH_MPS_HIGH_WATERMARK_RATIO'] = '0.0'
 
 def compute_metrics_discrete(eval_pred):
     logits, labels = eval_pred
@@ -62,10 +62,10 @@ def split_sets(dataset,df):
     if dataset in ['translation']:
         df['set']=df.id.str[:10]
         train_set=df.loc[df['set']=='newstest13']
-        dev_set, test_set = train_test_split(df.loc[df['set']=='newstest16'], test_size=0.6,random_state=42)
+        dev_set, test_set = train_test_split(df.loc[df['set']=='newstest16'], test_size=0.5,random_state=42)
     elif dataset in ['PAWS','pubmed']:
-        train_set, val_df = train_test_split(df, test_size=0.2,random_state=42)
-        dev_set, test_set = train_test_split(val_df, test_size=0.6,random_state=42)
+        train_set, val_df = train_test_split(df, test_size=0.3,random_state=42)
+        dev_set, test_set = train_test_split(val_df, test_size=0.5,random_state=42)
     elif dataset in ['logic','django','spider']:
         train_set=df.loc[df['id'].str.contains('train')]
         test_set=df.loc[df['id'].str.contains('test')]
@@ -77,13 +77,18 @@ def split_sets(dataset,df):
 def tokenize(batch):
     return tokenizer(batch["text"], padding=True, truncation=True, max_length=512)
 
+
 def model_init():
     transformers.set_seed(42)
-    m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2,device_map='auto')
-    m.roberta.apply(freeze_weights)
+    m = RobertaForSequenceClassification.from_pretrained('roberta-large-mnli', num_labels=2, device_map='auto')
+    m.classifier.dropout.p = 0.5  # Adjust the dropout probability as needed
+    # Unfreeze the last two layers
+    for name, param in list(m.roberta.named_parameters())[-4:]:
+        param.requires_grad = True
     for name, param in m.classifier.named_parameters():
         param.requires_grad = True
     return m
+
 
 class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False):
@@ -96,14 +101,10 @@ class CustomTrainer(Trainer):
         loss = loss_fct(logits.view(-1, self.model.config.num_labels), labels.view(-1))
         return (loss, outputs) if return_outputs else loss
 
-
 def freeze_weights(m):
     for name, param in m.named_parameters():
         param.requires_grad = False  
 
-def schedule_lr(num_warmup_steps, num_training_steps, optimizer):
-    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=num_training_steps)
-    return scheduler
 
 sweep_config = {
     'method': 'random'
@@ -119,8 +120,8 @@ parameters_dict = {
     }
 """
 parameters_dict = {
-    "learning_rate": {"values": [1e-5]},
-    "per_device_train_batch_size": {"values": [64 ]},
+    "learning_rate": {"values": [2e-5]},
+    "per_device_train_batch_size": {"values": [32 ]},
     }
 sweep_config['parameters'] = parameters_dict
 
@@ -163,7 +164,7 @@ else:
 ## prepare sets
 set_seed(42)
 torch.manual_seed(42)
-tokenizer = RobertaTokenizer.from_pretrained('roberta-large')
+tokenizer = RobertaTokenizer.from_pretrained('roberta-large-mnli')
 
 train_dataset=Dataset.from_pandas(train_set)
 val_dataset=Dataset.from_pandas(dev_set)
@@ -175,90 +176,16 @@ train_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label
 val_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 test_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 
-## optuna for automated hyperparameter tuning
-# Define the objective function for Optuna
-def objective(trial):
-    training_args = TrainingArguments(
-        output_dir=logs_path + 'results/' + run_name,
-        report_to=None,
-        evaluation_strategy='epoch',
-        save_strategy='epoch',
-        learning_rate=trial.suggest_float("learning_rate", 1e-6, 1e-4, log=True),
-        per_device_train_batch_size=trial.suggest_categorical("per_device_train_batch_size", [16, 32, 64]),
-        per_device_eval_batch_size=trial.suggest_categorical("per_device_eval_batch_size", [32, 64]),
-        save_total_limit=1,
-        num_train_epochs=25,
-        weight_decay=trial.suggest_float("weight_decay", 0.0, 0.1),
-        warmup_steps=1000,
-        push_to_hub=False,
-        logging_dir=logs_path + 'logs/' + run_name,
-        logging_steps=15,
-        seed=42,
-        load_best_model_at_end=True,
-        metric_for_best_model=decision_metric,
-        greater_is_better=True,
-        dataloader_num_workers=4,
-    )
-
-    trainer = CustomTrainer(
-        model_init=model_init,
-        args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=val_dataset,
-        compute_metrics=compute_metrics_discrete,
-    )
-
-    # Training the model
-    trainer.train()
-
-    # Evaluate on the validation set
-    res_val = trainer.evaluate()
-
-    # Optuna maximizes the objective function, so we minimize the negative f1-score for the positive class
-    return -res_val['eval_f1_1']
-
-# Create the Optuna study
-study = optuna.create_study(direction="minimize")
-
-# Start the optimization process
-study.optimize(objective, n_trials=50)
-
-best_params = study.best_params
-print("Best Hyperparameters:")
-print(best_params)
-
-training_args = TrainingArguments(
-    output_dir=logs_path + 'results/' + run_name,
-    report_to=None,
-    evaluation_strategy='epoch',
-    save_strategy='epoch',
-    learning_rate=best_params["learning_rate"],
-    per_device_train_batch_size=best_params["per_device_train_batch_size"],
-    per_device_eval_batch_size=best_params["per_device_eval_batch_size"],
-    save_total_limit=1,
-    num_train_epochs=25,
-    weight_decay=best_params["weight_decay"],
-    warmup_steps=1000,
-    push_to_hub=False,
-    logging_dir=logs_path + 'logs/' + run_name,
-    logging_steps=15,
-    seed=42,
-    load_best_model_at_end=True,
-    metric_for_best_model=decision_metric,
-    greater_is_better=True,
-)
-
-'''
 training_args = TrainingArguments(
     output_dir=logs_path+'results/'+run_name,
     report_to=None,
     evaluation_strategy='epoch',
     save_strategy='epoch',
-    learning_rate=1e-5,
+    learning_rate=2e-5,
     per_device_train_batch_size=32,
-    per_device_eval_batch_size=64,
+    per_device_eval_batch_size=32,
     save_total_limit=1,
-    num_train_epochs=25,
+    num_train_epochs=15,
     weight_decay=0.01,
     warmup_steps=500,
     push_to_hub=False,
@@ -268,10 +195,8 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,
     metric_for_best_model=decision_metric,
     greater_is_better=True,
-    dataloader_num_workers=4,
-
 )
-'''
+
 
 trainer = CustomTrainer(
     model_init=model_init,
@@ -280,17 +205,12 @@ trainer = CustomTrainer(
     eval_dataset=val_dataset,
     compute_metrics=compute_metrics_discrete,
 )
+torch.cuda.empty_cache()
 
-# Learning rate scheduler
-num_warmup_steps = int(len(train_dataset) / training_args.per_device_train_batch_size * training_args.warmup_ratio)
-num_training_steps = len(train_dataset) * training_args.num_train_epochs // training_args.per_device_train_batch_size
-
-scheduler = schedule_lr(num_warmup_steps, num_training_steps, trainer.optimizer)
-trainer.lr_scheduler = scheduler
-
-# Early stopping 
-early_stopping_callback = EarlyStoppingCallback(early_stopping_patience=3, early_stopping_threshold=0.01)
-trainer.add_callback(early_stopping_callback)
+scheduler = get_linear_schedule_with_warmup(
+    trainer.optimizer, num_warmup_steps=training_args.warmup_steps, num_training_steps=len(train_dataset) // training_args.per_device_train_batch_size * training_args.num_train_epochs
+)
+trainer.optimizer.set_scheduler(scheduler)
 
 trainer.train()
 
