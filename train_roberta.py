@@ -197,10 +197,6 @@ training_args = TrainingArguments(
     greater_is_better=True,
 )
 
-scheduler = get_linear_schedule_with_warmup(
-    trainer.optimizer, num_warmup_steps=training_args.warmup_steps, num_training_steps=len(train_dataset) // training_args.per_device_train_batch_size * training_args.num_train_epochs
-)
-trainer.optimizer.set_scheduler(scheduler)
 
 trainer = CustomTrainer(
     model_init=model_init,
@@ -209,6 +205,13 @@ trainer = CustomTrainer(
     eval_dataset=val_dataset,
     compute_metrics=compute_metrics_discrete,
 )
+
+scheduler = get_linear_schedule_with_warmup(
+    trainer.optimizer, num_warmup_steps=training_args.warmup_steps, num_training_steps=len(train_dataset) // training_args.per_device_train_batch_size * training_args.num_train_epochs
+)
+trainer.optimizer.set_scheduler(scheduler)
+
+
 trainer.train()
 
 print("##### VALIDATION RESULTS#####")
