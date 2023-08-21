@@ -1,10 +1,11 @@
-torch.cuda.empty_cache()
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from transformers import RobertaTokenizer, RobertaForSequenceClassification
 from torch.utils.data import DataLoader, Dataset
 import torch
 import numpy as np
+
+torch.cuda.empty_cache()
 
 # Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
