@@ -182,8 +182,8 @@ training_args = TrainingArguments(
     evaluation_strategy='epoch',
     save_strategy='epoch',
     learning_rate=2e-5,
-    per_device_train_batch_size=32,
-    per_device_eval_batch_size=32,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
     save_total_limit=1,
     num_train_epochs=15,
     weight_decay=0.01,
@@ -205,7 +205,6 @@ trainer = CustomTrainer(
     eval_dataset=val_dataset,
     compute_metrics=compute_metrics_discrete,
 )
-
 
 trainer.train()
 
