@@ -73,18 +73,6 @@ def split_sets(dataset,df):
     
     return train_set,dev_set,test_set
 
-def smote_resampling(train_set):
-    smote = SMOTE(sampling_strategy='auto', random_state=42)
-    X = train_set.drop(columns=['label'])
-    y = train_set['label']
-    
-    X_smote, y_smote = smote.fit_resample(X, y)
-    
-    # Combining the features and labels into one dataframe
-    train_set_smote = X_smote
-    train_set_smote['label'] = y_smote
-    
-    return train_set_smote
 
 def tokenize(batch):
     return tokenizer(batch["text"], padding=True, truncation=True, max_length=512)
@@ -142,7 +130,7 @@ sweep_config['metric'] = metric
 dataset='PAWS'
 #datasets=['PAWS','translation','pubmed','logic','django','spider']
 ## True for balancing the observations in the loss function (currently not working)
-compute_weights=False
+
 current=-1
 d_metric='f1_1'
 amr_flag=True
@@ -155,18 +143,14 @@ logs_path=''
 run_name=dataset+"_hyp_final_"+outcome_variable
 
 df=process_data(file_path=file_path,dataset=dataset,amr=amr_flag,outcome_variable=outcome_variable)
-train_set,dev_set,test_set=split_sets(dataset=dataset,df=df)
 
-train_set = smote_resampling(train_set)
+class_0 = df[df['label'] == 0].sample(n=1000, random_state=42)
+class_1 = df[df['label'] == 1]
 
+balanced_df = pd.concat([class_0, class_1], axis=0).sample(frac=1, random_state=42).reset_index(drop=True)
 
-if compute_weights:
-    class_weights = class_weight.compute_class_weight(class_weight='balanced', classes=train_set.label.unique(), y=train_set.label.values)
-else:
-    class_0_count = len(train_set[train_set["label"] == 0])
-    class_1_count = len(train_set[train_set["label"] == 1])
-    total = class_0_count + class_1_count
-    class_weights = [total/class_0_count, total/class_1_count]
+train_set,dev_set,test_set=split_sets(dataset=dataset,df=balanced_df)
+
 
 
 ## prepare sets
@@ -180,6 +164,7 @@ test_dataset=Dataset.from_pandas(test_set)
 train_dataset = train_dataset.map(tokenize, batched=True, batch_size=len(train_dataset))
 val_dataset = val_dataset.map(tokenize, batched=True, batch_size=len(val_dataset))
 test_dataset = test_dataset.map(tokenize, batched=True, batch_size=len(test_dataset))
+
 train_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 val_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
 test_dataset.set_format("torch", columns=["input_ids", "attention_mask", "label"])
