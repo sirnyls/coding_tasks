@@ -15,7 +15,7 @@ import transformers
 import wandb
 from transformers import get_linear_schedule_with_warmup
 import os
-os.environ['PYTORCH_MPS_HIGH_WATERMARK_RATIO'] = '0.0'
+from imblearn.over_sampling import SMOTE
 
 def compute_metrics_discrete(eval_pred):
     logits, labels = eval_pred
@@ -73,22 +73,32 @@ def split_sets(dataset,df):
     
     return train_set,dev_set,test_set
 
+def smote_resampling(train_set):
+    smote = SMOTE(sampling_strategy='auto', random_state=42)
+    X = train_set.drop(columns=['label'])
+    y = train_set['label']
+    
+    X_smote, y_smote = smote.fit_resample(X, y)
+    
+    # Combining the features and labels into one dataframe
+    train_set_smote = X_smote
+    train_set_smote['label'] = y_smote
+    
+    return train_set_smote
 
 def tokenize(batch):
     return tokenizer(batch["text"], padding=True, truncation=True, max_length=512)
 
 
+
 def model_init():
     transformers.set_seed(42)
-    m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2, device_map='auto')
-    m.classifier.dropout.p = 0.5  # Adjust the dropout probability as needed
-    # Unfreeze the last two layers
-    for name, param in list(m.roberta.named_parameters())[-4:]:
-        param.requires_grad = True
+    m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2,device_map='auto')
+    m.classifier.dropout.p = 0.3  # Adjust the dropout probability as needed
+    m.roberta.apply(freeze_weights)
     for name, param in m.classifier.named_parameters():
         param.requires_grad = True
     return m
-
 
 class CustomTrainer(Trainer):
     def compute_loss(self, model, inputs, return_outputs=False):
@@ -121,7 +131,7 @@ parameters_dict = {
 """
 parameters_dict = {
     "learning_rate": {"values": [2e-5]},
-    "per_device_train_batch_size": {"values": [32 ]},
+    "per_device_train_batch_size": {"values": [8 ]},
     }
 sweep_config['parameters'] = parameters_dict
 
@@ -147,19 +157,17 @@ run_name=dataset+"_hyp_final_"+outcome_variable
 df=process_data(file_path=file_path,dataset=dataset,amr=amr_flag,outcome_variable=outcome_variable)
 train_set,dev_set,test_set=split_sets(dataset=dataset,df=df)
 
+train_set = smote_resampling(train_set)
+
+
 if compute_weights:
-    class_weights=class_weight.compute_class_weight(class_weight='balanced',classes=train_set.label.unique(),y=train_set.label.values)
+    class_weights = class_weight.compute_class_weight(class_weight='balanced', classes=train_set.label.unique(), y=train_set.label.values)
 else:
-    ## same weights but balance dataset
-    class_weights=np.ones(df.label.unique().shape[0])
-    value_counts = train_set['label'].value_counts()
-    min_count = value_counts.min()
-    balanced_df = []
-    for value in value_counts.index:
-        subset = train_set[train_set['label'] == value]
-        resampled_subset = subset.sample(min_count, replace=True)
-        balanced_df.append(resampled_subset)
-    train_set = pd.concat(balanced_df)
+    class_0_count = len(train_set[train_set["label"] == 0])
+    class_1_count = len(train_set[train_set["label"] == 1])
+    total = class_0_count + class_1_count
+    class_weights = [total/class_0_count, total/class_1_count]
+
 
 ## prepare sets
 set_seed(42)
@@ -182,8 +190,8 @@ training_args = TrainingArguments(
     evaluation_strategy='epoch',
     save_strategy='epoch',
     learning_rate=2e-5,
-    per_device_train_batch_size=32,
-    per_device_eval_batch_size=32,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
     save_total_limit=1,
     num_train_epochs=15,
     weight_decay=0.01,
@@ -205,12 +213,7 @@ trainer = CustomTrainer(
     eval_dataset=val_dataset,
     compute_metrics=compute_metrics_discrete,
 )
-torch.cuda.empty_cache()
 
-scheduler = get_linear_schedule_with_warmup(
-    trainer.optimizer, num_warmup_steps=training_args.warmup_steps, num_training_steps=len(train_dataset) // training_args.per_device_train_batch_size * training_args.num_train_epochs
-)
-trainer.optimizer.set_scheduler(scheduler)
 
 trainer.train()
 
