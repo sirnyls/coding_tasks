@@ -140,7 +140,7 @@ sweep_config['metric'] = metric
 #sweep_id = wandb.sweep(sweep_config, project="helpfulness")
 
 
-dataset='pubmed'
+dataset='logic'
 #datasets=['PAWS','translation','pubmed','logic','django','spider']
 ## True for balancing the observations in the loss function (currently not working)
 compute_weights=True
@@ -151,7 +151,7 @@ decision_metric='eval_'+d_metric
 outcome_variable='helpfulness'
 ## final results files
 ##https://drive.google.com/drive/folders/17pwdiiu7U1oyly8YwMtqCRdu3GBIWT3K
-file_path='final_results_pubmed_corrected.csv'
+file_path='final_results_logic_corrected.csv'
 logs_path=''
 run_name=dataset+"_hyp_final_"+outcome_variable
 
@@ -168,8 +168,6 @@ elif dataset in ['logic']:
 elif dataset in ['django']:
     class_0 = df[df['label'] == 0].sample(n=2000, random_state=42)
     class_1 = df[df['label'] == 1]
-
-
 
 
 
