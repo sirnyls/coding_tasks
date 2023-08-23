@@ -87,7 +87,7 @@ def tokenize(batch):
 
 def model_init():
     transformers.set_seed(42)
-    m = RobertaForSequenceClassification.from_pretrained('roberta-base', num_labels=2,device_map='auto')
+    m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2,device_map='auto')
     m.roberta.apply(freeze_weights)
     for name, param in m.classifier.named_parameters():
         param.requires_grad = True
@@ -194,7 +194,7 @@ else:
 ## prepare sets
 set_seed(42)
 torch.manual_seed(42)
-tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
+tokenizer = RobertaTokenizer.from_pretrained('roberta-large')
 
 train_dataset=Dataset.from_pandas(train_set)
 val_dataset=Dataset.from_pandas(dev_set)
