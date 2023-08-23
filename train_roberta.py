@@ -137,7 +137,7 @@ parameters_dict = {
 sweep_config['parameters'] = parameters_dict
 
 sweep_config['metric'] = metric
-sweep_id = wandb.sweep(sweep_config, project="helpfulness")
+#sweep_id = wandb.sweep(sweep_config, project="helpfulness")
 
 
 dataset='pubmed'
