@@ -87,7 +87,10 @@ def tokenize(batch):
 
 def model_init():
     transformers.set_seed(42)
-    m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2,device_map='auto')
+    if dataset in ['logic', 'pubmed']:
+        m = RobertaForSequenceClassification.from_pretrained('roberta-base', num_labels=2,device_map='auto')
+    else: 
+        m = RobertaForSequenceClassification.from_pretrained('roberta-large', num_labels=2,device_map='auto')
     m.roberta.apply(freeze_weights)
     for name, param in m.classifier.named_parameters():
         param.requires_grad = True
@@ -140,7 +143,7 @@ sweep_config['metric'] = metric
 #sweep_id = wandb.sweep(sweep_config, project="helpfulness")
 
 
-dataset='logic'
+dataset='pubmed'
 #datasets=['PAWS','translation','pubmed','logic','django','spider']
 ## True for balancing the observations in the loss function (currently not working)
 compute_weights=True
@@ -151,7 +154,7 @@ decision_metric='eval_'+d_metric
 outcome_variable='helpfulness'
 ## final results files
 ##https://drive.google.com/drive/folders/17pwdiiu7U1oyly8YwMtqCRdu3GBIWT3K
-file_path='final_results_logic_corrected.csv'
+file_path='final_results_pubmed_corrected.csv'
 logs_path=''
 run_name=dataset+"_hyp_final_"+outcome_variable
 
@@ -194,7 +197,10 @@ else:
 ## prepare sets
 set_seed(42)
 torch.manual_seed(42)
-tokenizer = RobertaTokenizer.from_pretrained('roberta-large')
+if dataset in ['logic', 'pubmed']:
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
+else:
+    tokenizer = RobertaTokenizer.from_pretrained('roberta-large')
 
 train_dataset=Dataset.from_pandas(train_set)
 val_dataset=Dataset.from_pandas(dev_set)
