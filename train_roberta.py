@@ -18,11 +18,19 @@ def compute_metrics_discrete(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
     accuracy = accuracy_score(y_true=labels, y_pred=predictions)
-    cr=classification_report(labels,predictions,output_dict=True)
-    recall_w = recall_score(y_true=labels, y_pred=predictions,average='weighted')
-    precision_w = precision_score(y_true=labels, y_pred=predictions,average='weighted')
-    f1_micro = f1_score(y_true=labels, y_pred=predictions,average='micro')
-    f1_weighted = f1_score(y_true=labels, y_pred=predictions,average='weighted')
+    if dataset in ['pubmed', 'logic']:
+        cr = classification_report(labels, predictions, output_dict=True, zero_division=1) # Added zero_division
+        recall_w = recall_score(y_true=labels, y_pred=predictions, average='weighted', zero_division=1) # Added zero_division
+        precision_w = precision_score(y_true=labels, y_pred=predictions, average='weighted', zero_division=1) # Added zero_division
+        f1_micro = f1_score(y_true=labels, y_pred=predictions, average='micro', zero_division=1) # Added zero_division
+        f1_weighted = f1_score(y_true=labels, y_pred=predictions, average='weighted', zero_division=1) # Added zero_division
+    else: 
+        cr = classification_report(labels, predictions, output_dict=True)
+        recall_w = recall_score(y_true=labels, y_pred=predictions, average='weighted') 
+        precision_w = precision_score(y_true=labels, y_pred=predictions, average='weighted')                       
+        f1_micro = f1_score(y_true=labels, y_pred=predictions, average='micro')                    
+        f1_weighted = f1_score(y_true=labels, y_pred=predictions, average='weighted') 
+
     return {"accuracy": accuracy, "f1_0":cr['0']['f1-score'],"f1_1":cr['1']['f1-score'],
             "precision_1":cr['1']['precision'],"recall_1":cr['1']['recall'],
              "precision_w": precision_w, "recall_w": recall_w,
@@ -60,7 +68,10 @@ def split_sets(dataset,df):
         df['set']=df.id.str[:10]
         train_set=df.loc[df['set']=='newstest13']
         dev_set, test_set = train_test_split(df.loc[df['set']=='newstest16'], test_size=0.5,random_state=42)
-    elif dataset in ['PAWS','pubmed']:
+    elif dataset in ['PAWS']:
+        train_set, val_df = train_test_split(df, test_size=0.3,random_state=42)
+        dev_set, test_set = train_test_split(val_df, test_size=0.5,random_state=42)
+    elif dataset in ['pubmed']:
         train_set, val_df = train_test_split(df, test_size=0.3,random_state=42)
         dev_set, test_set = train_test_split(val_df, test_size=0.5,random_state=42)
     elif dataset in ['logic','django','spider']:
@@ -80,6 +91,14 @@ def model_init():
     m.roberta.apply(freeze_weights)
     for name, param in m.classifier.named_parameters():
         param.requires_grad = True
+
+    # trying to unfreeze some layers for pubmed and logix
+    if dataset in ['pubmed', 'logic']:
+        number_of_layers_to_unfreeze = 5
+        for layer in m.roberta.encoder.layer[-number_of_layers_to_unfreeze:]:
+            for param in layer.parameters():
+                param.requires_grad = True
+
     return m
 
 class CustomTrainer(Trainer):
@@ -118,13 +137,13 @@ parameters_dict = {
 sweep_config['parameters'] = parameters_dict
 
 sweep_config['metric'] = metric
-#sweep_id = wandb.sweep(sweep_config, project="helpfulness")
+sweep_id = wandb.sweep(sweep_config, project="helpfulness")
 
 
-dataset='django'
+dataset='pubmed'
 #datasets=['PAWS','translation','pubmed','logic','django','spider']
 ## True for balancing the observations in the loss function (currently not working)
-compute_weights=False
+compute_weights=True
 current=-1
 d_metric='f1_1'
 amr_flag=True
@@ -132,11 +151,13 @@ decision_metric='eval_'+d_metric
 outcome_variable='helpfulness'
 ## final results files
 ##https://drive.google.com/drive/folders/17pwdiiu7U1oyly8YwMtqCRdu3GBIWT3K
-file_path='final_results_django_corrected.csv'
+file_path='final_results_pubmed_corrected.csv'
 logs_path=''
 run_name=dataset+"_hyp_final_"+outcome_variable
 
 df=process_data(file_path=file_path,dataset=dataset,amr=amr_flag,outcome_variable=outcome_variable)
+
+# Undersampling of data in order to avoid huge data imbalance
 
 if dataset in ['PAWS','translation']:
     class_0 = df[df['label'] == 0].sample(n=1000, random_state=42)
@@ -144,14 +165,19 @@ if dataset in ['PAWS','translation']:
 elif dataset in ['logic']:
     class_0 = df[df['label'] == 0].sample(n=60, random_state=42)
     class_1 = df[df['label'] == 1] 
-else:
+elif dataset in ['django']:
     class_0 = df[df['label'] == 0].sample(n=2000, random_state=42)
     class_1 = df[df['label'] == 1]
 
 
-balanced_df = pd.concat([class_0, class_1], axis=0).sample(frac=1, random_state=42).reset_index(drop=True)
 
-train_set,dev_set,test_set=split_sets(dataset=dataset,df=balanced_df)
+
+
+if dataset in ['pubmed']:
+    train_set,dev_set,test_set=split_sets(dataset=dataset,df=df)
+else:
+    balanced_df = pd.concat([class_0, class_1], axis=0).sample(frac=1, random_state=42).reset_index(drop=True)
+    train_set,dev_set,test_set=split_sets(dataset=dataset,df=balanced_df)
 
 if compute_weights:
     class_weights=class_weight.compute_class_weight(class_weight='balanced',classes=train_set.label.unique(),y=train_set.label.values)
@@ -192,7 +218,7 @@ training_args = TrainingArguments(
     per_device_eval_batch_size=32,
     save_total_limit=1,
     num_train_epochs=15,
-    weight_decay=0.01,
+    weight_decay=0.001,
     warmup_steps=500,
     push_to_hub=False,
     logging_dir=logs_path+'logs/'+run_name,
