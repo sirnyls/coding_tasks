@@ -18,12 +18,13 @@ def compute_metrics_discrete(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
     accuracy = accuracy_score(y_true=labels, y_pred=predictions)
+    # Added zero_division
     if dataset in ['pubmed', 'logic']:
-        cr = classification_report(labels, predictions, output_dict=True, zero_division=1) # Added zero_division
-        recall_w = recall_score(y_true=labels, y_pred=predictions, average='weighted', zero_division=1) # Added zero_division
-        precision_w = precision_score(y_true=labels, y_pred=predictions, average='weighted', zero_division=1) # Added zero_division
-        f1_micro = f1_score(y_true=labels, y_pred=predictions, average='micro', zero_division=1) # Added zero_division
-        f1_weighted = f1_score(y_true=labels, y_pred=predictions, average='weighted', zero_division=1) # Added zero_division
+        cr = classification_report(labels, predictions, output_dict=True, zero_division=1) 
+        recall_w = recall_score(y_true=labels, y_pred=predictions, average='weighted', zero_division=1) 
+        precision_w = precision_score(y_true=labels, y_pred=predictions, average='weighted', zero_division=1) 
+        f1_micro = f1_score(y_true=labels, y_pred=predictions, average='micro', zero_division=1) 
+        f1_weighted = f1_score(y_true=labels, y_pred=predictions, average='weighted', zero_division=1) 
     else: 
         cr = classification_report(labels, predictions, output_dict=True)
         recall_w = recall_score(y_true=labels, y_pred=predictions, average='weighted') 
@@ -68,10 +69,7 @@ def split_sets(dataset,df):
         df['set']=df.id.str[:10]
         train_set=df.loc[df['set']=='newstest13']
         dev_set, test_set = train_test_split(df.loc[df['set']=='newstest16'], test_size=0.5,random_state=42)
-    elif dataset in ['PAWS']:
-        train_set, val_df = train_test_split(df, test_size=0.3,random_state=42)
-        dev_set, test_set = train_test_split(val_df, test_size=0.5,random_state=42)
-    elif dataset in ['pubmed']:
+    elif dataset in ['PAWS', 'pubmed']:
         train_set, val_df = train_test_split(df, test_size=0.3,random_state=42)
         dev_set, test_set = train_test_split(val_df, test_size=0.5,random_state=42)
     elif dataset in ['logic','django','spider']:
