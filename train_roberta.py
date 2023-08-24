@@ -178,11 +178,6 @@ elif dataset in ['pubmed']:
 balanced_df = pd.concat([class_0, class_1], axis=0).sample(frac=1, random_state=42).reset_index(drop=True)
 train_set,dev_set,test_set=split_sets(dataset=dataset,df=balanced_df)
 
-#if dataset in ['pubmed']:
-#    train_set,dev_set,test_set=split_sets(dataset=dataset,df=df)
-#else:
-#    balanced_df = pd.concat([class_0, class_1], axis=0).sample(frac=1, random_state=42).reset_index(drop=True)
-#    train_set,dev_set,test_set=split_sets(dataset=dataset,df=balanced_df)
 
 if compute_weights:
     class_weights=class_weight.compute_class_weight(class_weight='balanced',classes=train_set.label.unique(),y=train_set.label.values)
